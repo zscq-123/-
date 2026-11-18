@@ -2,9 +2,9 @@
 
 ## 运行与权限
 
-Next.js 通过 `/api/backend/*` 服务端代理访问 FastAPI `/api/*`。后端端口 8000，前端 3000。代理读 `BACKEND_URL`，不注入管理员身份。SQLAlchemy 默认本地 SQLite，支持 `DATABASE_URL`。
+群众触屏以 `/` 为入口，工作人员工作台和接待、电话联调位于 `/staff`。两端均通过 Next.js `/api/backend/*` 服务端代理访问 FastAPI `/api/*`。后端端口 8000，前端 3000。代理读 `BACKEND_URL`，不注入管理员身份。SQLAlchemy 默认本地 SQLite，支持 `DATABASE_URL`。
 
-创建会话返回随机 `session_token`，群众后续发送 `X-Session-Token`。后台 `/api/auth/login` 返回令牌，使用 `Authorization: Bearer ...`。角色由服务端账号确定。演示账号只用于本地。
+创建会话返回随机 `session_token`，群众后续发送 `X-Session-Token`。触屏只在页面内存中保留凭证和草稿。返回首页、完成后 30 秒或 3 分钟无操作时，清除本屏状态。后台 `/api/auth/login` 返回令牌，使用 `Authorization: Bearer ...`。角色由服务端账号确定。演示账号只用于本地。
 
 ## 状态机
 
@@ -57,3 +57,7 @@ staff 审核建单和咨询；reviewer 审核知识；admin 维护名录及以�
 ## 验收边界
 
 规则、智能体、知识来源随代码版本。真实知识审核、电话双向音频、人工接管及用户研究不能以自动化测试替代。生产需独立认证、TLS、机构隔离、对象存储、录音策略与保留审批。
+
+## 现场端视觉资源
+
+首页采用法治红，铜色天平主图使用内置 ImageGen 制作，资源位于 `apps/web/public/justice-scales.webp`。最终编辑提示词：保留右侧平衡的铜制天平和左侧留白，将深蓝场景改为深朱红漆面与深红石材，桌面为低饱和暖灰，保留自然光与超宽构图，不添加文字、旗帜或机构标识。

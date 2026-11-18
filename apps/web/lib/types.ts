@@ -1,0 +1,12 @@
+export type Role = 'admin' | 'staff' | 'reviewer' | 'auditor';
+export type Auth = {access_token: string; role: Role; username: string};
+export type Fields = {category: string; location: string; event_date: string; request: string; materials: string[]};
+export type Citation = {id: string; title: string; source_url: string; version: string; locator: string; region: string; updated_at: string; content: string};
+export type AgentRun = {id: string; agent: string; version: string; input_summary: unknown; output: unknown; citations: Citation[]; tools: unknown[]; risks: string[]; next_step: string; duration_ms: number; cost: number; status: string; created_at: string};
+export type Candidate = {id: string; name: string; qualification: string; domains: string[]; regions: string[]; available: boolean; active: boolean; reason?: string; match_reason?: string; reasons?: string[]};
+export type Evidence = {id?: string; filename: string; category?: string; fields?: unknown; extracted_fields?: unknown; status?: string; hash?: string; sha256?: string};
+export type Session = {id: string; channel: string; status: string; consent: boolean; created_at: string; messages: {role: string; content: string}[]; fields: Fields; summary: string; summary_version: number; confirmed_version: number | null; citations: Citation[]; evidence: Evidence[]; candidates: Candidate[]; runs: AgentRun[]; risks: string[]; handoff_reason?: string; work_order_id?: string; session_token?: string};
+export type Knowledge = Citation & {category: string; status: string; review_note?: string};
+export type WorkOrder = {id: string; session_id: string; status: string; assignee_id?: string; review_note?: string; created_at: string; summary?: string; timeline?: unknown[]};
+export type AuditEvent = {id: string; action: string; actor?: string; object_id?: string; session_id?: string; created_at: string; details?: unknown; request_id?: string};
+export type Metrics = {sessions: number; work_orders: number; handoffs: number; agent_runs: number; total_cost: number; permission_denials: number};
