@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Activity, ArrowRight, AudioLines, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, ClipboardList, FileText, Headphones, LayoutDashboard, ListChecks, LoaderCircle, LogIn, LogOut, MessageSquare, Mic, Phone, Plus, RefreshCw, Scale, Search, Send, ShieldCheck, Square, Upload, UserRound, Users, Volume2, X } from 'lucide-react';
 import { api } from '@/lib/api';
+import { speechStatus, useSpeechInput } from '@/lib/use-speech-input';
 import type { AgentRun, Auth, AuditEvent, Candidate, Citation, Fields, Knowledge, Metrics, Session, WorkOrder } from '@/lib/types';
 
 type Tab = 'intake' | 'queue' | 'knowledge' | 'audit' | 'phone';
@@ -26,8 +27,6 @@ function Empty({title, detail, icon: Icon = ClipboardList}: {title: string; deta
 function SourceList({sources}: {sources: Citation[]}) { return <div className="source-list">{sources.map((c, i) => <div className="source" key={`${c.id}-${i}`}><div className="source-index">{String(i + 1).padStart(2, '0')}</div><div><strong>{c.title}</strong><p>{c.content}</p><div className="source-meta">版本 {c.version} · {c.locator} · {c.region} · {when(c.updated_at)}</div>{/^https?:\/\//.test(c.source_url) && !c.source_url.includes('example.invalid') ? <a href={c.source_url} target="_blank" rel="noreferrer">查看来源 ↗</a> : <span className="source-meta">来源：{c.source_url}（模拟来源标识，不可作为办理依据）</span>}</div></div>)}</div>; }
 function Trace({runs}: {runs: AgentRun[]}) { return <div className="trace">{runs.length === 0 ? <p className="hint">智能体运行后，过程记录将显示在这里。</p> : runs.map((r, i) => <details key={r.id || i}><summary><span className="trace-dot"/><span><strong>{agentNames[r.agent] || r.agent}</strong><small>{r.version} · {r.duration_ms?.toFixed(0) || 0} ms</small></span><Badge value={r.status}/></summary><pre>{JSON.stringify({输入摘要: r.input_summary, 输出: r.output, 引用: r.citations, 工具: r.tools, 风险: r.risks, 下一步: r.next_step}, null, 2)}</pre></details>)}</div>; }
 
-type RecognitionInstance = {lang: string; continuous: boolean; interimResults: boolean; start: () => void; stop: () => void; abort: () => void; onresult: ((event: {results: ArrayLike<ArrayLike<{transcript: string}>>}) => void) | null; onerror: ((event: {error: string}) => void) | null; onend: (() => void) | null};
-type SpeechWindow = Window & {SpeechRecognition?: new () => RecognitionInstance; webkitSpeechRecognition?: new () => RecognitionInstance};
 
 export default function Page() {
   const [tab, setTab] = useState<Tab>('queue');
@@ -43,7 +42,8 @@ export default function Page() {
   const [phoneConsent, setPhoneConsent] = useState(false);
   const [voiceConsent, setVoiceConsent] = useState(false);
   const [evidenceConsent, setEvidenceConsent] = useState(false);
-  const [listening, setListening] = useState(false);
+  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: finishSpeech, cancel: cancelSpeech } = useSpeechInput();
+  const voiceActive = voicePhase !== 'idle';
   const [largeText, setLargeText] = useState(false);
   const [message, setMessage] = useState('');
   const [phoneMessage, setPhoneMessage] = useState('');
@@ -67,7 +67,6 @@ export default function Page() {
   const [personDraft, setPersonDraft] = useState({name: '', qualification: '模拟执业资格', domains: '劳动争议', regions: '烟台'});
   const [showKnowledgeForm, setShowKnowledgeForm] = useState(false);
   const [showPersonForm, setShowPersonForm] = useState(false);
-  const recognition = useRef<RecognitionInstance | null>(null);
   const transcriptEnd = useRef<HTMLDivElement>(null);
   const canWork = auth?.role === 'admin' || auth?.role === 'staff';
   const canKnowledge = auth?.role === 'admin' || auth?.role === 'reviewer';
@@ -82,7 +81,7 @@ export default function Page() {
     try { const saved = sessionStorage.getItem('legal-aid-auth'); if (saved) setAuth(JSON.parse(saved)); } catch { sessionStorage.removeItem('legal-aid-auth'); }
     api('/health').then(() => setHealth('online')).catch(() => setHealth('offline'));
     try { const saved = sessionStorage.getItem('legal-aid-intake'); if (saved) { const {id, token} = JSON.parse(saved); setSessionToken(token); api<Session>(`/sessions/${id}`, {sessionToken: token}).then(acceptSession).catch(() => sessionStorage.removeItem('legal-aid-intake')); } } catch { sessionStorage.removeItem('legal-aid-intake'); }
-    return () => { recognition.current?.abort(); window.speechSynthesis?.cancel(); };
+    return () => { window.speechSynthesis?.cancel(); };
   }, [acceptSession]);
   useEffect(() => { transcriptEnd.current?.scrollIntoView({behavior: 'smooth', block: 'nearest'}); }, [session?.messages.length]);
   const refresh = useCallback(async (target: Tab) => {
@@ -105,22 +104,17 @@ export default function Page() {
     setSessionToken(s.session_token || ''); sessionStorage.setItem('legal-aid-intake', JSON.stringify({id: s.id, token: s.session_token})); acceptSession(s);
   };
   const sendMessage = async (event: FormEvent) => {
-    event.preventDefault(); if (!message.trim() || !session) return;
+    event.preventDefault(); if (!message.trim() || !session || voiceActive) return;
     await execute(async () => {
       const s = await api<Session>(`/sessions/${session.id}/messages`, {method: 'POST', body: {content: message}, sessionToken}); acceptSession(s); setMessage('');
       if (s.status === 'collecting') acceptSession(await api<Session>('/orchestrator/run', {method: 'POST', body: {session_id: session.id}, sessionToken}));
     });
   };
-  const stopVoice = () => { recognition.current?.abort(); recognition.current = null; setListening(false); window.speechSynthesis?.cancel(); };
+  const stopVoice = () => { cancelSpeech(); window.speechSynthesis?.cancel(); };
   const startVoice = () => {
-    if (!voiceConsent) { setError('请先确认浏览器语音服务的数据处理提示。'); return; }
-    const Speech = (window as SpeechWindow).SpeechRecognition || (window as SpeechWindow).webkitSpeechRecognition;
-    if (!Speech) { setError('此浏览器不支持语音识别，请使用文字输入。'); return; }
-    const r = new Speech(); r.lang = 'zh-CN'; r.continuous = false; r.interimResults = false;
-    r.onresult = e => setMessage(old => `${old}${Array.from(e.results).map(x => x[0].transcript).join('')}`);
-    r.onerror = () => { setError('语音识别未完成。可重试、使用文字或转人工。'); setListening(false); };
-    r.onend = () => setListening(false); recognition.current = r;
-    try { r.start(); setListening(true); setError(''); } catch { setError('无法开启麦克风，请检查浏览器权限或改用文字。'); }
+    if (!voiceConsent) return;
+    window.speechSynthesis?.cancel();
+    startSpeech(text => setMessage(previous => `${previous}${text}`.slice(0, 4000)));
   };
   const speak = (text: string) => {
     if (!voiceConsent) { setError('朗读使用浏览器语音服务，请先勾选语音服务同意。'); return; }
@@ -164,8 +158,8 @@ export default function Page() {
             <section className="panel reception"><div className="panel-heading"><div className="panel-title"><span className="icon-tile"><MessageSquare size={18}/></span><div><h2>现场咨询</h2><span className="hint">{session ? `咨询编号 ${shortId(session.id)}` : '安全、清晰、可随时转人工'}</span></div></div>{session ? <Badge value={session.status}/> : <span className="tag">文字 / 语音</span>}</div>
               {!session ? <div className="welcome"><div className="welcome-illustration"><Scale size={42} strokeWidth={1.4}/><span className="illustration-orbit"><MessageSquare size={17}/></span></div><h2>您好，这里是法援智能接待</h2><p>请用自己的话说说遇到的事情。我们会帮您整理信息，<br className="desktop-only"/>并把需要核实的内容交给工作人员。</p><div className="consent-card"><strong><ShieldCheck size={16}/>开始前，请了解</strong><ul><li>这是模拟演示，请勿填写真实姓名、身份证、电话或案卷。</li><li>系统提供信息登记与流程导航，不作受理决定或法律意见。</li><li>本次咨询将保存为演示记录，您可以随时要求人工接续。</li></ul><label className="checkbox"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}/>我已了解并同意本次模拟咨询的信息处理</label></div><button className="button primary start-button" disabled={!consent || busy} onClick={() => void execute(() => startSession())}>开始接待 <ArrowRight size={17}/></button><span className="hint">无须登录 · 仅使用虚构信息</span></div> : <>
                 <div className="transcript"><div className="chat-row assistant"><div className="chat-avatar"><Scale size={16}/></div><div className="bubble">您好，请描述您遇到的事情、发生地点、时间和希望获得的帮助。您也可以在右侧补充具体字段。</div></div>{session.messages.map((m, i) => <div className={`chat-row ${m.role === 'user' ? 'user' : 'assistant'}`} key={i}>{m.role !== 'user' && <div className="chat-avatar"><Scale size={16}/></div>}<div className="bubble">{m.content}</div></div>)}{session.handoff_reason && <div className="handoff-message"><Headphones size={19}/><div><strong>已进入人工接续队列</strong><p>{session.handoff_reason}</p></div></div>}<div ref={transcriptEnd}/></div>
-                <form className="composer" onSubmit={sendMessage}><textarea aria-label="咨询内容" placeholder="请描述事情经过，也可以先从一句话开始…" value={message} onChange={e => setMessage(e.target.value)} maxLength={4000} disabled={closed || busy}/><div className="composer-tools"><div><button type="button" className={`icon-button ${listening ? 'recording' : ''}`} title={listening ? '停止识别' : '语音输入'} aria-label={listening ? '停止识别' : '语音输入'} disabled={closed || busy} onClick={listening ? stopVoice : startVoice}>{listening ? <Square size={17}/> : <Mic size={18}/>}</button><span className="hint">{listening ? '正在聆听，识别后可修改文字' : `${message.length}/4000`}</span></div><button className="button primary" disabled={busy || closed || !message.trim()}>发送并整理 <Send size={15}/></button></div></form>
-                <div className="voice-consent"><label className="checkbox"><input type="checkbox" checked={voiceConsent} onChange={e => {setVoiceConsent(e.target.checked); if (!e.target.checked) stopVoice();}}/>同意使用浏览器语音服务</label><p>识别与朗读可能由浏览器服务提供商处理内容。仅用于虚构测试；不录存原始音频，可随时停止并改用文字。</p></div>
+                <form className="composer" onSubmit={sendMessage}><textarea aria-label="咨询内容" placeholder="请描述事情经过，也可以先从一句话开始…" value={message} onChange={e => setMessage(e.target.value)} maxLength={4000} disabled={closed || busy}/><div className="composer-tools"><div><button type="button" className={`icon-button ${voiceActive ? 'recording' : ''}`} title={voiceActive ? '停止识别' : '语音输入'} aria-label={voiceActive ? '停止识别' : '语音输入'} disabled={closed || busy || !voiceConsent || voicePhase === 'processing'} onClick={voiceActive ? finishSpeech : startVoice}>{voiceActive ? <Square size={17}/> : <Mic size={18}/>}</button><span className="hint">{voicePhase !== 'idle' ? <span role="status">{speechStatus[voicePhase]}</span> : `${message.length}/4000`}</span></div><button className="button primary" disabled={busy || closed || voiceActive || !message.trim()}>发送并整理 <Send size={15}/></button></div></form>
+                <div className="voice-consent"><label className="checkbox"><input type="checkbox" checked={voiceConsent} onChange={e => {setVoiceConsent(e.target.checked); if (!e.target.checked) stopVoice();}}/>同意使用浏览器语音服务</label><p>识别与朗读可能由浏览器服务提供商处理内容。仅用于虚构测试；不录存原始音频，可随时停止并改用文字。</p>{voiceError && <p role="alert">{voiceError}</p>}</div>
                 <div className="session-actions"><button className="text-button" disabled={busy || closed} onClick={() => void execute(async () => acceptSession(await api<Session>(`/sessions/${session.id}/handoff`, {method: 'POST', body: {reason: '用户主动要求人工服务'}, sessionToken}))) }><Headphones size={15}/>转人工</button><button className="text-button" onClick={() => {stopVoice(); setSession(null); setSessionToken(''); setFields(emptyFields); setConsent(false); setEvidenceConsent(false); setVoiceConsent(false); sessionStorage.removeItem('legal-aid-intake');}}>开始新咨询</button><span className="hint">原记录保留供工作人员接续</span></div>
               </>}
             </section>

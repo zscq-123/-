@@ -166,6 +166,10 @@
 .voicePanel .textLabel { margin: 16px 0; font-size: 17px; }
 .voicePanel .textLabel textarea { font-size: 17px; }
 
+.voiceError, .voiceStatus { margin: 10px 0 0; font-size: 16px; }
+.voiceError { color: #842d25; }
+.voiceStatus { color: var(--screen-red-dark); }
+
 .review { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
 .review > div { padding: 14px 17px; border-radius: 10px; background: #faf2ee; overflow-wrap: anywhere; }
 .review dt { color: var(--screen-subtle); font-size: 15px; }

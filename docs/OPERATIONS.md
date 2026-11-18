@@ -29,6 +29,12 @@ cp .env.example .env
 
 工作人员在 `/staff` 登录后查看人工队列和工单、知识名录、审计指标与电话模拟。不要在同一公用终端保持后台登录；结束工作人员操作后退出登录。
 
+### 现场语音检查
+
+在实际触屏设备上，用带麦克风权限的浏览器打开本机地址或 HTTPS 地址。用虚构信息进入「语音或文字说明」，同意浏览器语音服务，点击「开始说话」，看到「正在聆听」后说一句话。点「停止说话」后等待转写，核对文字再点「整理这段说明」。若提示权限、采集、网络或空转写，按页面提示重试，或直接键入说明、继续点选。
+
+语音由浏览器的识别服务处理。项目后端收到的是使用者确认发送的文字。DeepSeek 处理文字需要另外同意。中心实机验收需要测试实际浏览器、话筒和网络条件，至少走通授权、识别、改字、提交与文字回退。
+
 ## 外部模型配置
 
 `MODEL_MODE=deterministic` 为默认规则模式。虚构数据联调时，在仓库根目录的私有 `.env` 设置 `MODEL_MODE=external`、`MODEL_EXTERNAL_CONSENT=true`、`MODEL_BASE_URL=https://api.deepseek.com`、`MODEL_NAME=deepseek-flash`，并填写 `MODEL_API_KEY`。重启后端应用配置。实际处理中心咨询前，由机构确认第三方处理授权和数据范围。[DeepSeek Chat Completions 文档](https://api-docs.deepseek.com/api/create-chat-completion/)

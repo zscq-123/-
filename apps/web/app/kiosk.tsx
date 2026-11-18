@@ -3,29 +3,13 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, Car, Check, CircleHelp, ClipboardList, Headphones, HeartHandshake, Home, Mic, Scale, ShieldCheck, Square } from 'lucide-react';
 import { api } from '@/lib/api';
+import { speechStatus, useSpeechInput } from '@/lib/use-speech-input';
 import type { Fields, Session } from '@/lib/types';
 import styles from './kiosk.module.css';
 
 type Step = 'home' | 'consent' | 'details' | 'review' | 'done' | 'exit';
 type Route = 'self' | 'help';
 type SessionAccess = { id: string; token: string };
-type Recognition = {
-  lang: string;
-  interimResults: boolean;
-  continuous: boolean;
-  start(): void;
-  stop(): void;
-  abort(): void;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
-  onend: (() => void) | null;
-};
-
-type SpeechWindow = Window & {
-  SpeechRecognition?: new () => Recognition;
-  webkitSpeechRecognition?: new () => Recognition;
-};
-
 const emptyFields: Fields = { category: '', location: '', event_date: '', request: '', materials: [] };
 const categories = [
   { value: '劳动争议', hint: '工资、辞退、工伤', icon: BriefcaseBusiness },
@@ -56,24 +40,13 @@ export default function Kiosk() {
   const [voiceConsent, setVoiceConsent] = useState(false);
   const [modelProvider, setModelProvider] = useState<string | null>(null);
   const [modelConsent, setModelConsent] = useState(false);
-  const [listening, setListening] = useState(false);
+  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput();
+  const voiceActive = voicePhase !== 'idle';
   const [speechText, setSpeechText] = useState('');
   const [usedVoice, setUsedVoice] = useState(false);
   const access = useRef<SessionAccess | null>(null);
   const running = useRef(false);
-  const recognition = useRef<Recognition | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
-
-  const stopVoice = useCallback(() => {
-    if (recognition.current) {
-      recognition.current.onresult = null;
-      recognition.current.onerror = null;
-      recognition.current.onend = null;
-      recognition.current.abort();
-      recognition.current = null;
-    }
-    setListening(false);
-  }, []);
 
   const reset = useCallback(() => {
     stopVoice();
@@ -118,8 +91,6 @@ export default function Kiosk() {
       window.removeEventListener('input', schedule);
     };
   }, [step, busy, reset]);
-
-  useEffect(() => () => recognition.current?.abort(), []);
 
   useEffect(() => {
     void api<{ model_provider?: string | null }>('/health')
@@ -189,6 +160,7 @@ export default function Kiosk() {
 
   async function prepareReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (voiceActive || !complete || speechText.trim()) return;
     stopVoice();
     await perform(async () => {
       const { id, token } = await getAccess();
@@ -230,37 +202,16 @@ export default function Kiosk() {
   }
 
   function startVoice() {
-    if (!voiceConsent || recognition.current) return;
-    setError('');
-    const browser = window as SpeechWindow;
-    const Speech = browser.SpeechRecognition ?? browser.webkitSpeechRecognition;
-    if (!Speech) {
-      setError('这台终端暂不支持语音。您可用下方选项继续。');
-      return;
-    }
-    const mic = new Speech();
-    mic.lang = 'zh-CN';
-    mic.interimResults = false;
-    mic.continuous = false;
-    mic.onresult = event => {
+    if (!voiceConsent) return;
+    startSpeech(text => {
       setUsedVoice(true);
-      setSpeechText(text => `${text}${Array.from(event.results).map(row => row[0].transcript).join('')}`.slice(0, 4000));
-    };
-    mic.onerror = () => setError('没有识别到语音。请重试，或直接点选下方信息。');
-    mic.onend = () => { recognition.current = null; setListening(false); };
-    try {
-      recognition.current = mic;
-      mic.start();
-      setListening(true);
-    } catch {
-      stopVoice();
-      setError('无法使用麦克风。请直接点选下方信息。');
-    }
+      setSpeechText(previous => `${previous}${text}`.slice(0, 4000));
+    });
   }
 
   function applySpeech() {
     const content = speechText.trim();
-    if (!content) return;
+    if (!content || voiceActive) return;
     stopVoice();
     void perform(async () => {
       const { id, token } = await getAccess();
@@ -368,16 +319,19 @@ export default function Kiosk() {
         {step === 'details' && <form className={`${styles.panel} ${styles.details}`} onSubmit={prepareReview}>
           <div className={styles.voiceTools}>
             <button type="button" className={styles.secondary} aria-expanded={voiceOpen} disabled={busy} onClick={() => { stopVoice(); setVoiceOpen(open => !open); }}>
-              <Mic size={21} aria-hidden />{voiceOpen ? '收起语音或文字说明' : '语音或文字说明（可选）'}
+              <Mic size={21} aria-hidden />{voiceOpen ? '收起语音或文字说明' : speechText.trim() ? '查看待整理的说明' : '语音或文字说明（可选）'}
             </button>
             {voiceOpen && <div className={styles.voicePanel}>
               <label className={styles.consentCheck}>
                 <input type="checkbox" checked={voiceConsent} disabled={busy} onChange={event => { setVoiceConsent(event.target.checked); if (!event.target.checked) stopVoice(); }} />
                 <span>我同意使用浏览器语音服务。识别可能由浏览器服务商处理。</span>
               </label>
-              <button type="button" className={styles.secondary} disabled={busy || !voiceConsent} onClick={() => listening ? recognition.current?.stop() : startVoice()}>
-                {listening ? <Square size={19} aria-hidden /> : <Mic size={19} aria-hidden />}{listening ? '停止说话' : '开始说话'}
+              <button type="button" className={styles.secondary} disabled={busy || !voiceConsent || voicePhase === 'processing'} onClick={voiceActive ? stopSpeech : startVoice}>
+                {voiceActive ? <Square size={19} aria-hidden /> : <Mic size={19} aria-hidden />}
+                {voicePhase === 'starting' ? '取消语音' : voicePhase === 'listening' ? '停止说话' : voicePhase === 'processing' ? '正在识别' : '开始说话'}
               </button>
+              {voiceError ? <p className={styles.voiceError} role="alert">{voiceError}</p>
+                : voicePhase !== 'idle' ? <p className={styles.voiceStatus} role="status">{speechStatus[voicePhase]}</p> : null}
               <label className={styles.textLabel}>咨询说明
                 <textarea autoComplete="off" value={speechText} onChange={event => setSpeechText(event.target.value)} maxLength={4000} rows={3} placeholder="例如：我在烟台市，2026年11月1日遇到拖欠工资，希望了解如何登记。" />
               </label>
@@ -385,7 +339,7 @@ export default function Kiosk() {
                 <input type="checkbox" checked={modelConsent} disabled={busy} onChange={event => setModelConsent(event.target.checked)} />
                 <span>同意将本次咨询的文字说明发送给 {modelProvider === 'deepseek' ? 'DeepSeek' : '外部模型'}，帮助补全登记信息（可选）。</span>
               </label>}
-              <button type="button" className={styles.primary} disabled={busy || listening || !speechText.trim()} onClick={applySpeech}>整理这段说明</button>
+              <button type="button" className={styles.primary} disabled={busy || voiceActive || !speechText.trim()} onClick={applySpeech}>整理这段说明</button>
               {speechText.trim() && <button type="button" className={styles.helpLink} disabled={busy} onClick={() => setSpeechText('')}>清除说明</button>}
             </div>}
           </div>
@@ -406,9 +360,10 @@ export default function Kiosk() {
           </div>
           <div className={styles.actions}>
             <button type="button" className={styles.secondary} disabled={busy} onClick={() => void requestHelp()}><Headphones size={21} aria-hidden />请工作人员帮助</button>
-            <button className={styles.primary} disabled={!complete || busy || !!speechText.trim()}>下一步：核对信息<ArrowRight size={22} aria-hidden /></button>
+            <button className={styles.primary} disabled={!complete || busy || voiceActive || !!speechText.trim()}>下一步：核对信息<ArrowRight size={22} aria-hidden /></button>
           </div>
-          {!complete && <p className={styles.nextHint}>请选好事项、地点、时间和需要的帮助。</p>}
+          {speechText.trim() && !voiceOpen && <p className={styles.nextHint}>请先整理或清除待处理的说明。</p>}
+          {!speechText.trim() && !complete && <p className={styles.nextHint}>请选好事项、地点、时间和需要的帮助。</p>}
         </form>}
 
         {step === 'review' && session && <section className={`${styles.panel} ${styles.narrow}`} aria-label="咨询摘要">
