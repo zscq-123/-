@@ -46,7 +46,7 @@ def has_speech_level(wav: Path) -> bool:
     return False
 
 
-def transcribe(recording: bytes, content_type: str) -> str:
+def transcribe(recording: bytes, content_type: str, *, preview: bool = False) -> str:
     demuxer = AUDIO_FORMATS.get(content_type.split(';', 1)[0].strip().lower())
     if not demuxer:
         raise SpeechError(415, '此浏览器的录音格式暂不支持，请改用文字。')
@@ -66,7 +66,7 @@ def transcribe(recording: bytes, content_type: str) -> str:
                 [ffmpeg, '-nostdin', '-loglevel', 'error', '-protocol_whitelist', 'pipe',
                  '-f', demuxer, '-i', 'pipe:0', '-map', '0:a:0', '-vn', '-t', str(MAX_AUDIO_SECONDS),
                  '-ar', '16000', '-ac', '1', '-c:a', 'pcm_s16le', str(wav)],
-                input=recording, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=6,
+                input=recording, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2 if preview else 6,
             )
             if decoded.returncode != 0 or not wav.is_file():
                 raise SpeechError(422, '未能读取这段录音，请重录或改用文字。')
@@ -76,7 +76,7 @@ def transcribe(recording: bytes, content_type: str) -> str:
             result = subprocess.run(
                 [whisper, '-m', model, '-f', str(wav), '-l', 'zh', '-t', '4', '-nt', '-np',
                  '-otxt', '-of', str(output), '--prompt', '这是一段普通话对话。'],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=22,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5 if preview else 22,
             )
             text_file = output.with_suffix('.txt')
             if result.returncode != 0 or not text_file.is_file():

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type SpeechPhase = 'idle' | 'starting' | 'listening' | 'processing';
-export type Transcribe = (audio: Blob, signal: AbortSignal) => Promise<string>;
+export type Transcribe = (audio: Blob, signal: AbortSignal, preview?: boolean) => Promise<string>;
 
 type Recording = {
   stream?: MediaStream;
@@ -16,6 +16,7 @@ type Recording = {
 const formats = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus'];
 const maxBytes = 2 * 1024 * 1024;
 const expectedSeconds = 35;
+const previewIntervalMs = 2400;
 
 function release(recording: Recording) {
   window.clearTimeout(recording.timer);
@@ -40,6 +41,7 @@ export function useRecordedSpeech(transcribe: Transcribe) {
   const active = useRef<Recording | null>(null);
   const [phase, setPhase] = useState<SpeechPhase>('idle');
   const [error, setError] = useState('');
+  const [previewText, setPreviewText] = useState('');
 
   const clear = useCallback(() => {
     const recording = active.current;
@@ -53,6 +55,7 @@ export function useRecordedSpeech(transcribe: Transcribe) {
     clear();
     setPhase('idle');
     setError('');
+    setPreviewText('');
   }, [clear]);
 
   function finish(recording: Recording, message = '') {
@@ -60,6 +63,7 @@ export function useRecordedSpeech(transcribe: Transcribe) {
     clear();
     setPhase('idle');
     setError(message);
+    setPreviewText('');
   }
 
   function stop() {
@@ -80,6 +84,7 @@ export function useRecordedSpeech(transcribe: Transcribe) {
   async function start(onText: (text: string) => void) {
     if (active.current) return;
     setError('');
+    setPreviewText('');
     if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
       setError('当前浏览器无法录音，请用支持麦克风的浏览器打开本机地址，或改用文字。');
       return;
@@ -100,11 +105,39 @@ export function useRecordedSpeech(transcribe: Transcribe) {
       recording.recorder = recorder;
       const chunks: Blob[] = [];
       let size = 0;
+      let lastPreviewAt = performance.now();
+      let latestPreview = '';
+      let previewRequest: Promise<void> | undefined;
+      const audioSnapshot = () => new Blob(chunks, {type: recorder.mimeType || chunks[0].type});
+
+      async function updatePreview(audio: Blob) {
+        try {
+          const text = await transcribe(audio, recording.controller.signal, true);
+          if (active.current === recording && text.trim()) {
+            latestPreview = text;
+            if (!recording.stopping) setPreviewText(text);
+          }
+        } catch {
+          // Silence and incomplete containers can fail during capture. A failed
+          // preview must leave recording and the final transcription available.
+        } finally {
+          previewRequest = undefined;
+        }
+      }
+
       recorder.ondataavailable = event => {
         if (recording !== active.current || !event.data.size) return;
         size += event.data.size;
-        if (size > maxBytes) finish(recording, '录音太长，请分成几段说。');
-        else chunks.push(event.data);
+        if (size > maxBytes) {
+          finish(recording, '录音太长，请分成几段说。');
+          return;
+        }
+        chunks.push(event.data);
+        if (!recording.stopping && !previewRequest && performance.now() - lastPreviewAt >= previewIntervalMs) {
+          lastPreviewAt = performance.now();
+          // Keep the container's initialization bytes with subsequent audio.
+          previewRequest = updatePreview(audioSnapshot());
+        }
       };
       recorder.onerror = () => finish(recording, '麦克风录音中断，请重试或改用文字。');
       recorder.onstop = async () => {
@@ -115,13 +148,22 @@ export function useRecordedSpeech(transcribe: Transcribe) {
           return;
         }
         try {
-          const audio = new Blob(chunks, {type: recorder.mimeType || chunks[0].type});
-          const text = await transcribe(audio, recording.controller.signal);
+          // The local worker handles one job at a time. Finish any preview
+          // already in flight before sending the definitive recording.
+          await previewRequest;
+          if (active.current !== recording) return;
+          const text = await transcribe(audioSnapshot(), recording.controller.signal);
           if (active.current !== recording) return;
           onText(text);
           finish(recording);
         } catch (cause) {
-          finish(recording, cause instanceof Error ? cause.message : '转写未完成，请重试或改用文字。');
+          if (active.current !== recording) return;
+          if (latestPreview) {
+            onText(latestPreview);
+            finish(recording, '完整转写未完成，已保留实时字幕。请核对并补充末段文字。');
+          } else {
+            finish(recording, cause instanceof Error ? cause.message : '转写未完成，请重试或改用文字。');
+          }
         }
       };
       recorder.start(250);
@@ -133,5 +175,5 @@ export function useRecordedSpeech(transcribe: Transcribe) {
     }
   }
 
-  return { phase, error, start, stop, cancel };
+  return { phase, error, start, stop, cancel, previewText };
 }

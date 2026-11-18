@@ -42,6 +42,7 @@ async function proxy(request: NextRequest, context: {params: Promise<{path: stri
   }
   const hasBody = !['GET', 'HEAD'].includes(request.method);
   const audio = request.method === 'POST' && path.length === 3 && path[0] === 'sessions' && path[2] === 'transcribe';
+  const preview = audio && request.nextUrl.searchParams.get('preview') === 'true';
   const limit = audio ? 2 * 1024 * 1024 : 250000;
   if (Number(request.headers.get('content-length') || 0) > limit) {
     return NextResponse.json({detail: '请求内容过大'}, {status: 413});
@@ -52,7 +53,7 @@ async function proxy(request: NextRequest, context: {params: Promise<{path: stri
       return NextResponse.json({detail: '请求内容过大'}, {status: 413});
     }
     const response = await fetch(origin, {method: request.method, headers, body, cache: 'no-store',
-      signal: AbortSignal.timeout(audio ? 35000 : 20000), redirect: 'error'});
+      signal: AbortSignal.timeout(preview ? 9000 : audio ? 35000 : 20000), redirect: 'error'});
     return new Response(await response.arrayBuffer(), {status: response.status, headers: {
       'Content-Type': response.headers.get('content-type') || 'application/json', 'Cache-Control': 'no-store',
     }});

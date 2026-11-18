@@ -157,7 +157,7 @@ function useBrowserSpeechInput() {
     }
   }
 
-  return { phase, error, start, stop, cancel };
+  return { phase, error, start, stop, cancel, previewText: '' };
 }
 
 export function useSpeechInput(provider: SpeechProvider | null, transcribe: Transcribe) {

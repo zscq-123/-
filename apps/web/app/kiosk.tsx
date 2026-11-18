@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, Car, Check, CircleHelp, ClipboardList, Headphones, HeartHandshake, Home, Mic, Scale, ShieldCheck, Square } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, transcribeAudio } from '@/lib/api';
 import { speechStatus, useSpeechInput, type SpeechProvider } from '@/lib/use-speech-input';
 import type { Fields, Session } from '@/lib/types';
 import styles from './kiosk.module.css';
@@ -41,7 +41,7 @@ export default function Kiosk() {
   const [speechProvider, setSpeechProvider] = useState<SpeechProvider | null>(null);
   const [modelProvider, setModelProvider] = useState<string | null>(null);
   const [modelConsent, setModelConsent] = useState(false);
-  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput(speechProvider, transcribeRecording);
+  const { phase: voicePhase, error: voiceError, previewText, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput(speechProvider, transcribeRecording);
   const voiceActive = voicePhase !== 'idle';
   const [speechText, setSpeechText] = useState('');
   const [usedVoice, setUsedVoice] = useState(false);
@@ -128,13 +128,10 @@ export default function Kiosk() {
     return access.current;
   }
 
-  async function transcribeRecording(audio: Blob, signal: AbortSignal) {
+  async function transcribeRecording(audio: Blob, signal: AbortSignal, preview = false) {
     const { id, token } = await getAccess('voice', signal);
     signal.throwIfAborted();
-    const result = await api<{ text: string }>(`/sessions/${id}/transcribe`, {
-      method: 'POST', body: audio, sessionToken: token, signal,
-    });
-    return result.text;
+    return transcribeAudio(id, token, audio, signal, preview);
   }
 
   async function run(id: string, token: string, allowExternalModel = false) {
@@ -338,7 +335,7 @@ export default function Kiosk() {
             {voiceOpen && <div className={styles.voicePanel}>
               <label className={styles.consentCheck}>
                 <input type="checkbox" checked={voiceConsent} disabled={busy} onChange={event => { setVoiceConsent(event.target.checked); if (!event.target.checked) stopVoice(); }} />
-                <span>{speechProvider === 'local_whisper' ? '我同意录音并在本地转写。请在说完后点击停止。' : '我同意使用浏览器语音服务。识别可能由浏览器服务商处理。'}</span>
+                <span>{speechProvider === 'local_whisper' ? '我同意录音并在本地转写。说话时可查看字幕。' : '我同意使用浏览器语音服务。识别可能由浏览器服务商处理。'}</span>
               </label>
               <button type="button" className={styles.secondary} disabled={busy || !voiceConsent || !speechProvider || voicePhase === 'processing'} onClick={voiceActive ? stopSpeech : startVoice}>
                 {voiceActive ? <Square size={19} aria-hidden /> : <Mic size={19} aria-hidden />}
@@ -346,6 +343,10 @@ export default function Kiosk() {
               </button>
               {voiceError ? <p className={styles.voiceError} role="alert">{voiceError}</p>
                 : voicePhase !== 'idle' ? <p className={styles.voiceStatus} role="status">{speechStatus[voicePhase]}</p> : null}
+              {speechProvider === 'local_whisper' && (voicePhase === 'listening' || previewText) && <section className={styles.liveTranscript} aria-label="实时转写">
+                <strong>实时转写</strong>
+                <p>{previewText || '说话后，文字会显示在这里。'}</p>
+              </section>}
               <label className={styles.textLabel}>咨询说明
                 <textarea autoComplete="off" value={speechText} onChange={event => setSpeechText(event.target.value)} maxLength={4000} rows={3} placeholder="例如：我在烟台市，2026年11月1日遇到拖欠工资，希望了解如何登记。" />
               </label>

@@ -32,7 +32,7 @@ AgentRun: `id,agent,version,input_summary,output,citations,tools,risks,next_step
 | GET /sessions | 后台，可选 status | Session[] |
 | GET /sessions/{id} | 授权头 | Session |
 | POST /sessions/{id}/messages | content | Session |
-| POST /sessions/{id}/transcribe | 音频请求体，最多 2 MiB，需当前会话令牌 | 可编辑的转写草稿 text |
+| POST /sessions/{id}/transcribe | 音频请求体，最多 2 MiB，需当前会话令牌。`preview=true` 时按预览时限处理 | 实时字幕或最终草稿 `text` |
 | PATCH /sessions/{id}/fields | category,location,event_date,request,materials 可选 | Session |
 | POST /orchestrator/run | session_id，allow_external_model（可选，默认 false，仅群众会话令牌可设为 true） | Session |
 | POST /sessions/{id}/confirm | summary_version | Session |

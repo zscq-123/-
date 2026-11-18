@@ -12,3 +12,11 @@ export async function api<T>(path: string, options: {method?: string; body?: unk
   }
   return result as T;
 }
+
+export async function transcribeAudio(sessionId: string, sessionToken: string, audio: Blob, signal: AbortSignal, preview = false) {
+  const suffix = preview ? '?preview=true' : '';
+  const result = await api<{ text: string }>(`/sessions/${sessionId}/transcribe${suffix}`, {
+    method: 'POST', body: audio, sessionToken, signal,
+  });
+  return result.text;
+}

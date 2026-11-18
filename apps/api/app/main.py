@@ -205,7 +205,7 @@ def create_app(database_url=None, *, rate_limit=None):
         record, actor = session_access(request, db, sid)
         return persist(record, add_message(db, deepcopy(record.data), body.content, actor))
 
-    def transcribe_session(sid: str, request: Request, recording: bytes):
+    def transcribe_session(sid: str, request: Request, recording: bytes, preview: bool):
         with db_lock, factory() as db:
             try:
                 record, actor = session_access(request, db, sid)
@@ -216,13 +216,13 @@ def create_app(database_url=None, *, rate_limit=None):
                 db.commit()
         # Release the session write lock before decoding or running Whisper.
         try:
-            return {'text': transcribe(recording, request.headers.get('content-type', ''))}
+            return {'text': transcribe(recording, request.headers.get('content-type', ''), preview=preview)}
         except SpeechError as error:
             raise HTTPException(error.status_code, str(error)) from None
 
     @app.post('/api/sessions/{sid}/transcribe')
-    async def speech_to_text(sid: str, request: Request):
-        return await run_in_threadpool(transcribe_session, sid, request, await request.body())
+    async def speech_to_text(sid: str, request: Request, preview: bool = False):
+        return await run_in_threadpool(transcribe_session, sid, request, await request.body(), preview)
 
     @app.patch('/api/sessions/{sid}/fields')
     def fields(sid: str, body: S.Fields, request: Request, db=Depends(get_db)):
