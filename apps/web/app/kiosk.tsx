@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowLeft, ArrowRight, BriefcaseBusiness, Car, Check, CircleHelp, ClipboardList, Headphones, HeartHandshake, Home, Mic, Scale, ShieldCheck, Square } from 'lucide-react';
 import { api } from '@/lib/api';
-import { speechStatus, useSpeechInput } from '@/lib/use-speech-input';
+import { speechStatus, useSpeechInput, type SpeechProvider } from '@/lib/use-speech-input';
 import type { Fields, Session } from '@/lib/types';
 import styles from './kiosk.module.css';
 
@@ -38,9 +38,10 @@ export default function Kiosk() {
   const [error, setError] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [voiceConsent, setVoiceConsent] = useState(false);
+  const [speechProvider, setSpeechProvider] = useState<SpeechProvider | null>(null);
   const [modelProvider, setModelProvider] = useState<string | null>(null);
   const [modelConsent, setModelConsent] = useState(false);
-  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput();
+  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput(speechProvider, transcribeRecording);
   const voiceActive = voicePhase !== 'idle';
   const [speechText, setSpeechText] = useState('');
   const [usedVoice, setUsedVoice] = useState(false);
@@ -93,9 +94,12 @@ export default function Kiosk() {
   }, [step, busy, reset]);
 
   useEffect(() => {
-    void api<{ model_provider?: string | null }>('/health')
-      .then(health => setModelProvider(health.model_provider ?? null))
-      .catch(() => setModelProvider(null));
+    void api<{ model_provider?: string | null; speech_provider?: SpeechProvider }>('/health')
+      .then(health => {
+        setModelProvider(health.model_provider ?? null);
+        setSpeechProvider(health.speech_provider ?? 'browser');
+      })
+      .catch(() => setSpeechProvider('browser'));
   }, []);
 
   async function perform(task: () => Promise<void>) {
@@ -113,14 +117,24 @@ export default function Kiosk() {
     }
   }
 
-  async function getAccess(): Promise<SessionAccess> {
+  async function getAccess(channel?: 'voice', signal?: AbortSignal): Promise<SessionAccess> {
     if (access.current) return access.current;
     const created = await api<Session>('/sessions', {
-      method: 'POST', body: { channel: usedVoice ? 'voice' : 'text', consent: true },
+      method: 'POST', body: { channel: channel ?? (usedVoice ? 'voice' : 'text'), consent: true }, signal,
     });
     if (!created.session_token) throw new Error('接待服务暂不可用，请前往人工服务台。');
+    signal?.throwIfAborted();
     access.current = { id: created.id, token: created.session_token };
     return access.current;
+  }
+
+  async function transcribeRecording(audio: Blob, signal: AbortSignal) {
+    const { id, token } = await getAccess('voice', signal);
+    signal.throwIfAborted();
+    const result = await api<{ text: string }>(`/sessions/${id}/transcribe`, {
+      method: 'POST', body: audio, sessionToken: token, signal,
+    });
+    return result.text;
   }
 
   async function run(id: string, token: string, allowExternalModel = false) {
@@ -202,8 +216,8 @@ export default function Kiosk() {
   }
 
   function startVoice() {
-    if (!voiceConsent) return;
-    startSpeech(text => {
+    if (!voiceConsent || !speechProvider) return;
+    void startSpeech(text => {
       setUsedVoice(true);
       setSpeechText(previous => `${previous}${text}`.slice(0, 4000));
     });
@@ -324,9 +338,9 @@ export default function Kiosk() {
             {voiceOpen && <div className={styles.voicePanel}>
               <label className={styles.consentCheck}>
                 <input type="checkbox" checked={voiceConsent} disabled={busy} onChange={event => { setVoiceConsent(event.target.checked); if (!event.target.checked) stopVoice(); }} />
-                <span>我同意使用浏览器语音服务。识别可能由浏览器服务商处理。</span>
+                <span>{speechProvider === 'local_whisper' ? '我同意录音并在本地转写。请在说完后点击停止。' : '我同意使用浏览器语音服务。识别可能由浏览器服务商处理。'}</span>
               </label>
-              <button type="button" className={styles.secondary} disabled={busy || !voiceConsent || voicePhase === 'processing'} onClick={voiceActive ? stopSpeech : startVoice}>
+              <button type="button" className={styles.secondary} disabled={busy || !voiceConsent || !speechProvider || voicePhase === 'processing'} onClick={voiceActive ? stopSpeech : startVoice}>
                 {voiceActive ? <Square size={19} aria-hidden /> : <Mic size={19} aria-hidden />}
                 {voicePhase === 'starting' ? '取消语音' : voicePhase === 'listening' ? '停止说话' : voicePhase === 'processing' ? '正在识别' : '开始说话'}
               </button>

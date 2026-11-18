@@ -12,9 +12,11 @@ import time
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 from sqlalchemy import select
 from .database import Record, database, now, seed
 from .model_gateway import configured_provider
+from .speech import MAX_AUDIO_BYTES, SpeechError, local_engine, transcribe
 from . import schemas as S
 from .services import VERSION, CATEGORIES, POLICY, ident, audit, tool, risk_flags, handoff, invalidate, orchestrate, lookup, candidates, append_run, explicit_conflicts
 
@@ -44,14 +46,17 @@ def create_app(database_url=None, *, rate_limit=None):
 
     @app.middleware('http')
     async def limits(request, call_next):
-        if request.headers.get('content-length', '0').isdigit() and int(request.headers.get('content-length', '0')) > 100000:
+        path = request.url.path
+        is_audio = request.method == 'POST' and path.startswith('/api/sessions/') and path.endswith('/transcribe')
+        size_limit = MAX_AUDIO_BYTES if is_audio else 100000
+        if request.headers.get('content-length', '0').isdigit() and int(request.headers.get('content-length', '0')) > size_limit:
             return JSONResponse(status_code=413, content={'detail': '请求体超过限制'})
         if request.method in {'POST', 'PATCH'}:
             body_size = 0
             chunks = []
             async for chunk in request.stream():
                 body_size += len(chunk)
-                if body_size > 100000:
+                if body_size > size_limit:
                     return JSONResponse(status_code=413, content={'detail': '请求体超过限制'})
                 chunks.append(chunk)
             request._body = b''.join(chunks)
@@ -148,6 +153,7 @@ def create_app(database_url=None, *, rate_limit=None):
     def health():
         return {'status': 'ok', 'mode': mode, 'version': VERSION, 'model_mode': os.getenv('MODEL_MODE', 'deterministic'),
                 'model_provider': configured_provider() if os.getenv('MODEL_EXTERNAL_CONSENT') == 'true' and os.getenv('MODEL_API_KEY') else None,
+                'speech_provider': 'local_whisper' if local_engine() else 'browser',
                 'telephony': 'simulator_only', 'knowledge': 'demo_samples'}
 
     @app.post('/api/auth/login')
@@ -198,6 +204,25 @@ def create_app(database_url=None, *, rate_limit=None):
     def messages(sid: str, body: S.Message, request: Request, db=Depends(get_db)):
         record, actor = session_access(request, db, sid)
         return persist(record, add_message(db, deepcopy(record.data), body.content, actor))
+
+    def transcribe_session(sid: str, request: Request, recording: bytes):
+        with db_lock, factory() as db:
+            try:
+                record, actor = session_access(request, db, sid)
+                if actor != 'session_holder':
+                    denied(db, object_id=sid, session_id=sid)
+                editable(record.data)
+            finally:
+                db.commit()
+        # Release the session write lock before decoding or running Whisper.
+        try:
+            return {'text': transcribe(recording, request.headers.get('content-type', ''))}
+        except SpeechError as error:
+            raise HTTPException(error.status_code, str(error)) from None
+
+    @app.post('/api/sessions/{sid}/transcribe')
+    async def speech_to_text(sid: str, request: Request):
+        return await run_in_threadpool(transcribe_session, sid, request, await request.body())
 
     @app.patch('/api/sessions/{sid}/fields')
     def fields(sid: str, body: S.Fields, request: Request, db=Depends(get_db)):

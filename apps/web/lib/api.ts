@@ -1,8 +1,10 @@
-export async function api<T>(path: string, options: {method?: string; body?: unknown; token?: string; sessionToken?: string} = {}): Promise<T> {
-  const headers: Record<string, string> = {'Content-Type': 'application/json'};
+export async function api<T>(path: string, options: {method?: string; body?: unknown; token?: string; sessionToken?: string; signal?: AbortSignal} = {}): Promise<T> {
+  const audio = options.body instanceof Blob ? options.body : null;
+  const headers: Record<string, string> = {'Content-Type': audio ? audio.type : 'application/json'};
   if (options.token) headers.Authorization = `Bearer ${options.token}`;
   if (options.sessionToken) headers['X-Session-Token'] = options.sessionToken;
-  const response = await fetch(`/api/backend${path}`, {method: options.method || 'GET', headers, body: options.body === undefined ? undefined : JSON.stringify(options.body), cache: 'no-store'});
+  const response = await fetch(`/api/backend${path}`, {method: options.method || 'GET', headers,
+    body: audio ?? (options.body === undefined ? undefined : JSON.stringify(options.body)), cache: 'no-store', signal: options.signal});
   const result = await response.json().catch(() => ({detail: '服务返回了无法识别的结果'}));
   if (!response.ok) {
     const detail = result.detail;

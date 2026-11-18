@@ -1,8 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRecordedSpeech, type Transcribe } from './use-recorded-speech';
 
 type Phase = 'idle' | 'starting' | 'listening' | 'processing';
+export type SpeechProvider = 'browser' | 'local_whisper';
 type Recognition = {
   lang: string;
   continuous: boolean;
@@ -56,7 +58,7 @@ function release(run: Run, abort: boolean) {
   }
 }
 
-export function useSpeechInput() {
+function useBrowserSpeechInput() {
   const active = useRef<Run | null>(null);
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState('');
@@ -156,4 +158,10 @@ export function useSpeechInput() {
   }
 
   return { phase, error, start, stop, cancel };
+}
+
+export function useSpeechInput(provider: SpeechProvider | null, transcribe: Transcribe) {
+  const browser = useBrowserSpeechInput();
+  const local = useRecordedSpeech(transcribe);
+  return provider === 'local_whisper' ? local : browser;
 }

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { Activity, ArrowRight, AudioLines, BookOpen, Check, CheckCheck, ChevronRight, CircleHelp, ClipboardList, FileText, Headphones, LayoutDashboard, ListChecks, LoaderCircle, LogIn, LogOut, MessageSquare, Mic, Phone, Plus, RefreshCw, Scale, Search, Send, ShieldCheck, Square, Upload, UserRound, Users, Volume2, X } from 'lucide-react';
 import { api } from '@/lib/api';
-import { speechStatus, useSpeechInput } from '@/lib/use-speech-input';
+import { speechStatus, useSpeechInput, type SpeechProvider } from '@/lib/use-speech-input';
 import type { AgentRun, Auth, AuditEvent, Candidate, Citation, Fields, Knowledge, Metrics, Session, WorkOrder } from '@/lib/types';
 
 type Tab = 'intake' | 'queue' | 'knowledge' | 'audit' | 'phone';
@@ -41,8 +41,14 @@ export default function Page() {
   const [consent, setConsent] = useState(false);
   const [phoneConsent, setPhoneConsent] = useState(false);
   const [voiceConsent, setVoiceConsent] = useState(false);
+  const [speechProvider, setSpeechProvider] = useState<SpeechProvider | null>(null);
   const [evidenceConsent, setEvidenceConsent] = useState(false);
-  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: finishSpeech, cancel: cancelSpeech } = useSpeechInput();
+  const { phase: voicePhase, error: voiceError, start: startSpeech, stop: finishSpeech, cancel: cancelSpeech } = useSpeechInput(speechProvider, async (audio, signal) => {
+    const result = await api<{ text: string }>(`/sessions/${session?.id}/transcribe`, {
+      method: 'POST', body: audio, sessionToken, signal,
+    });
+    return result.text;
+  });
   const voiceActive = voicePhase !== 'idle';
   const [largeText, setLargeText] = useState(false);
   const [message, setMessage] = useState('');
@@ -79,7 +85,13 @@ export default function Page() {
   const acceptSession = useCallback((s: Session) => { setSession(s); setFields({...emptyFields, ...s.fields, materials: s.fields?.materials || []}); }, []);
   useEffect(() => {
     try { const saved = sessionStorage.getItem('legal-aid-auth'); if (saved) setAuth(JSON.parse(saved)); } catch { sessionStorage.removeItem('legal-aid-auth'); }
-    api('/health').then(() => setHealth('online')).catch(() => setHealth('offline'));
+    api<{ speech_provider?: SpeechProvider }>('/health').then(result => {
+      setHealth('online');
+      setSpeechProvider(result.speech_provider ?? 'browser');
+    }).catch(() => {
+      setHealth('offline');
+      setSpeechProvider('browser');
+    });
     try { const saved = sessionStorage.getItem('legal-aid-intake'); if (saved) { const {id, token} = JSON.parse(saved); setSessionToken(token); api<Session>(`/sessions/${id}`, {sessionToken: token}).then(acceptSession).catch(() => sessionStorage.removeItem('legal-aid-intake')); } } catch { sessionStorage.removeItem('legal-aid-intake'); }
     return () => { window.speechSynthesis?.cancel(); };
   }, [acceptSession]);
@@ -112,9 +124,9 @@ export default function Page() {
   };
   const stopVoice = () => { cancelSpeech(); window.speechSynthesis?.cancel(); };
   const startVoice = () => {
-    if (!voiceConsent) return;
+    if (!voiceConsent || !speechProvider) return;
     window.speechSynthesis?.cancel();
-    startSpeech(text => setMessage(previous => `${previous}${text}`.slice(0, 4000)));
+    void startSpeech(text => setMessage(previous => `${previous}${text}`.slice(0, 4000)));
   };
   const speak = (text: string) => {
     if (!voiceConsent) { setError('朗读使用浏览器语音服务，请先勾选语音服务同意。'); return; }
@@ -158,8 +170,8 @@ export default function Page() {
             <section className="panel reception"><div className="panel-heading"><div className="panel-title"><span className="icon-tile"><MessageSquare size={18}/></span><div><h2>现场咨询</h2><span className="hint">{session ? `咨询编号 ${shortId(session.id)}` : '安全、清晰、可随时转人工'}</span></div></div>{session ? <Badge value={session.status}/> : <span className="tag">文字 / 语音</span>}</div>
               {!session ? <div className="welcome"><div className="welcome-illustration"><Scale size={42} strokeWidth={1.4}/><span className="illustration-orbit"><MessageSquare size={17}/></span></div><h2>您好，这里是法援智能接待</h2><p>请用自己的话说说遇到的事情。我们会帮您整理信息，<br className="desktop-only"/>并把需要核实的内容交给工作人员。</p><div className="consent-card"><strong><ShieldCheck size={16}/>开始前，请了解</strong><ul><li>这是模拟演示，请勿填写真实姓名、身份证、电话或案卷。</li><li>系统提供信息登记与流程导航，不作受理决定或法律意见。</li><li>本次咨询将保存为演示记录，您可以随时要求人工接续。</li></ul><label className="checkbox"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}/>我已了解并同意本次模拟咨询的信息处理</label></div><button className="button primary start-button" disabled={!consent || busy} onClick={() => void execute(() => startSession())}>开始接待 <ArrowRight size={17}/></button><span className="hint">无须登录 · 仅使用虚构信息</span></div> : <>
                 <div className="transcript"><div className="chat-row assistant"><div className="chat-avatar"><Scale size={16}/></div><div className="bubble">您好，请描述您遇到的事情、发生地点、时间和希望获得的帮助。您也可以在右侧补充具体字段。</div></div>{session.messages.map((m, i) => <div className={`chat-row ${m.role === 'user' ? 'user' : 'assistant'}`} key={i}>{m.role !== 'user' && <div className="chat-avatar"><Scale size={16}/></div>}<div className="bubble">{m.content}</div></div>)}{session.handoff_reason && <div className="handoff-message"><Headphones size={19}/><div><strong>已进入人工接续队列</strong><p>{session.handoff_reason}</p></div></div>}<div ref={transcriptEnd}/></div>
-                <form className="composer" onSubmit={sendMessage}><textarea aria-label="咨询内容" placeholder="请描述事情经过，也可以先从一句话开始…" value={message} onChange={e => setMessage(e.target.value)} maxLength={4000} disabled={closed || busy}/><div className="composer-tools"><div><button type="button" className={`icon-button ${voiceActive ? 'recording' : ''}`} title={voiceActive ? '停止识别' : '语音输入'} aria-label={voiceActive ? '停止识别' : '语音输入'} disabled={closed || busy || !voiceConsent || voicePhase === 'processing'} onClick={voiceActive ? finishSpeech : startVoice}>{voiceActive ? <Square size={17}/> : <Mic size={18}/>}</button><span className="hint">{voicePhase !== 'idle' ? <span role="status">{speechStatus[voicePhase]}</span> : `${message.length}/4000`}</span></div><button className="button primary" disabled={busy || closed || voiceActive || !message.trim()}>发送并整理 <Send size={15}/></button></div></form>
-                <div className="voice-consent"><label className="checkbox"><input type="checkbox" checked={voiceConsent} onChange={e => {setVoiceConsent(e.target.checked); if (!e.target.checked) stopVoice();}}/>同意使用浏览器语音服务</label><p>识别与朗读可能由浏览器服务提供商处理内容。仅用于虚构测试；不录存原始音频，可随时停止并改用文字。</p>{voiceError && <p role="alert">{voiceError}</p>}</div>
+                <form className="composer" onSubmit={sendMessage}><textarea aria-label="咨询内容" placeholder="请描述事情经过，也可以先从一句话开始…" value={message} onChange={e => setMessage(e.target.value)} maxLength={4000} disabled={closed || busy}/><div className="composer-tools"><div><button type="button" className={`icon-button ${voiceActive ? 'recording' : ''}`} title={voiceActive ? '停止识别' : '语音输入'} aria-label={voiceActive ? '停止识别' : '语音输入'} disabled={closed || busy || !voiceConsent || !speechProvider || voicePhase === 'processing'} onClick={voiceActive ? finishSpeech : startVoice}>{voiceActive ? <Square size={17}/> : <Mic size={18}/>}</button><span className="hint">{voicePhase !== 'idle' ? <span role="status">{speechStatus[voicePhase]}</span> : `${message.length}/4000`}</span></div><button className="button primary" disabled={busy || closed || voiceActive || !message.trim()}>发送并整理 <Send size={15}/></button></div></form>
+                <div className="voice-consent"><label className="checkbox"><input type="checkbox" checked={voiceConsent} onChange={e => {setVoiceConsent(e.target.checked); if (!e.target.checked) stopVoice();}}/>{speechProvider === 'local_whisper' ? '同意录音并在本地转写' : '同意使用浏览器语音服务'}</label><p>{speechProvider === 'local_whisper' ? '录音在本地后端转写，朗读由浏览器提供。' : '识别与朗读可能由浏览器服务提供商处理内容。'}仅使用虚构内容，可随时停止并改用文字。</p>{voiceError && <p role="alert">{voiceError}</p>}</div>
                 <div className="session-actions"><button className="text-button" disabled={busy || closed} onClick={() => void execute(async () => acceptSession(await api<Session>(`/sessions/${session.id}/handoff`, {method: 'POST', body: {reason: '用户主动要求人工服务'}, sessionToken}))) }><Headphones size={15}/>转人工</button><button className="text-button" onClick={() => {stopVoice(); setSession(null); setSessionToken(''); setFields(emptyFields); setConsent(false); setEvidenceConsent(false); setVoiceConsent(false); sessionStorage.removeItem('legal-aid-intake');}}>开始新咨询</button><span className="hint">原记录保留供工作人员接续</span></div>
               </>}
             </section>

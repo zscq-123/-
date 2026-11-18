@@ -128,6 +128,34 @@ def test_basic_workflow(client):
     assert client.post('/api/orchestrator/run',headers=h,json={'session_id':s['id']}).status_code == 409
 
 
+def test_recording_requires_session_token_and_does_not_save_transcript(client, monkeypatch):
+    def transcribe(audio, content_type):
+        assert audio == b'fake recording'
+        assert content_type == 'audio/webm;codecs=opus'
+        return '这是可编辑的转写草稿。'
+
+    monkeypatch.setattr('app.main.transcribe', transcribe)
+    s, h = new(client, channel='voice')
+    uri = f"/api/sessions/{s['id']}/transcribe"
+    content_type = {'Content-Type': 'audio/webm;codecs=opus'}
+    _, other = new(client, channel='voice')
+    for denied_headers in (content_type, {**content_type, **other}, {**content_type, **auth(client)}):
+        assert client.post(uri, content=b'fake recording', headers=denied_headers).status_code == 403
+    result = client.post(uri, content=b'fake recording', headers={**content_type, **h})
+    assert result.json() == {'text': '这是可编辑的转写草稿。'}
+    saved = client.get(f"/api/sessions/{s['id']}", headers=h).json()
+    assert saved['messages'] == s['messages']
+    assert client.post(uri, content=b'x' * (2 * 1024 * 1024 + 1), headers={**content_type, **h}).status_code == 413
+
+
+def test_recording_unavailable_and_unsupported_format(client, monkeypatch):
+    monkeypatch.delenv('SPEECH_MODEL_PATH', raising=False)
+    s, h = new(client, channel='voice')
+    uri = f"/api/sessions/{s['id']}/transcribe"
+    assert client.post(uri, content=b'fake', headers={**h, 'Content-Type': 'text/plain'}).status_code == 415
+    assert client.post(uri, content=b'fake', headers={**h, 'Content-Type': 'audio/webm'}).status_code == 503
+
+
 def test_external_model_requires_session_holder_opt_in_and_missing_fields(client, monkeypatch):
     from app.model_gateway import Extraction, ModelGateway
 
