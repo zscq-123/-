@@ -368,3 +368,30 @@ def test_large_chunked_request_rejected(client):
         yield b'"}'
     r=client.post('/api/sessions',content=stream(),headers={'Content-Type':'application/json'})
     assert r.status_code==413
+
+
+@pytest.mark.parametrize('signal', ['更正', '纠正', '之前说错了', '其实', '实际上'])
+def test_natural_language_correction_handoff(client,signal):
+    s,h=ready(client)
+    correction=signal+'，我在青岛市，2026-10-02发生交通事故，希望整理事故材料。'
+    r=client.post('/api/sessions/'+s['id']+'/messages',headers=h,json={'content':correction}).json()
+    assert r['status']=='handed_off'
+    assert {f['field'] for f in r['field_conflicts']}=={'location','event_date','category'}
+    assert r['fields']['location']=='烟台市'
+    assert r['fields']['category']=='劳动争议'
+    assert any(m['content']==correction for m in r['messages'])
+    assert r['confirmed_version'] is None
+
+
+def test_unparsed_retraction_handoff(client):
+    s,h=ready(client)
+    r=client.post('/api/sessions/'+s['id']+'/messages',headers=h,json={'content':'之前说错了，我需要重新核实后再告诉您。'}).json()
+    assert r['status']=='handed_off'
+    assert r['field_conflicts'][0]['field']=='pending_correction'
+
+
+def test_ordinary_supplement_does_not_trigger_conflict(client):
+    s,h=ready(client)
+    r=client.post('/api/sessions/'+s['id']+'/messages',headers=h,json={'content':'我还有工资记录，稍后准备上传。'}).json()
+    assert r['status']=='collecting'
+    assert not r.get('field_conflicts')

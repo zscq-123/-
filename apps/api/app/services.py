@@ -81,6 +81,19 @@ def explicit_conflicts(fields, text):
         match = re.search(pattern, text)
         if match and fields.get(key) and fields[key].strip() != match.group(1).strip():
             conflicts.append({'field': key, 'previous': fields[key], 'reported': match.group(1).strip()})
+    # Explicit correction language is not ordinary field supplementation. Never
+    # silently retain the first historical extraction when the user retracts it.
+    correction = re.search(r'更正|纠正|之前说错|刚才说错|说得不对|不对[，,。；]|实际上|其实', text)
+    if correction and any(fields.get(key) for key in ('location', 'event_date', 'category')):
+        reported = extract_fields(text)
+        already = {item['field'] for item in conflicts}
+        for key in ('location', 'event_date', 'category'):
+            if key not in already and fields.get(key) and reported.get(key) and fields[key].strip() != reported[key].strip():
+                conflicts.append({'field': key, 'previous': fields[key], 'reported': reported[key]})
+        if not conflicts:
+            # A retraction can be meaningful even when the deterministic parser
+            # cannot identify its replacement value; preserve it for staff.
+            conflicts.append({'field': 'pending_correction', 'previous': '已有登记信息待重新核实', 'reported': text})
     return conflicts
 
 

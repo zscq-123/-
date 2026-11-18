@@ -1,0 +1,1202 @@
+[
+  {
+    "id": "synthetic-001",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-01单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-01",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-002",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-02遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-02",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-003",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-03遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "烟台市",
+      "event_date": "2026-10-03",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-004",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-04发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "烟台市",
+      "event_date": "2026-10-04",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-005",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-05单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-05",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-006",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-06遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-06",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-007",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-07遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "青岛市",
+      "event_date": "2026-10-07",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-008",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-08发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "青岛市",
+      "event_date": "2026-10-08",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-009",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-09单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-09",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-010",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-10遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-10",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-011",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-11遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "济南市",
+      "event_date": "2026-10-11",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-012",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-12发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "济南市",
+      "event_date": "2026-10-12",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-013",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-13单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-13",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-014",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-14遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-14",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-015",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-15遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "北京市",
+      "event_date": "2026-10-15",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-016",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-16发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "北京市",
+      "event_date": "2026-10-16",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-017",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-17单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-17",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-018",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-18遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-18",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-019",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-19遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "上海市",
+      "event_date": "2026-10-19",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-020",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-20发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "上海市",
+      "event_date": "2026-10-20",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-021",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-21单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-21",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-022",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-22遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-22",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-023",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-23遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "烟台市",
+      "event_date": "2026-10-23",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-024",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-24发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "烟台市",
+      "event_date": "2026-10-24",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-025",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-25单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-25",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-026",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-26遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-26",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-027",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-27遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "青岛市",
+      "event_date": "2026-10-27",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-028",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-28发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "青岛市",
+      "event_date": "2026-10-28",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-029",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-01单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-01",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-030",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-02遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-02",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-031",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-03遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "济南市",
+      "event_date": "2026-10-03",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-032",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-04发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "济南市",
+      "event_date": "2026-10-04",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-033",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-05单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-05",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-034",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-06遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-06",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-035",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-07遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "北京市",
+      "event_date": "2026-10-07",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-036",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-08发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "北京市",
+      "event_date": "2026-10-08",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-037",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-09单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-09",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-038",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-10遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-10",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-039",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-11遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "上海市",
+      "event_date": "2026-10-11",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-040",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-12发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "上海市",
+      "event_date": "2026-10-12",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-041",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-13单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-13",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-042",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-14遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-14",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-043",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-15遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "烟台市",
+      "event_date": "2026-10-15",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-044",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-16发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "烟台市",
+      "event_date": "2026-10-16",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-045",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-17单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-17",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-046",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-18遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-18",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-047",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-19遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "青岛市",
+      "event_date": "2026-10-19",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-048",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-20发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "青岛市",
+      "event_date": "2026-10-20",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-049",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-21单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-21",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-050",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-22遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-22",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-051",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-23遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "济南市",
+      "event_date": "2026-10-23",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-052",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-24发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "济南市",
+      "event_date": "2026-10-24",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-053",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-25单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-25",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-054",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-26遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-26",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-055",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-27遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "北京市",
+      "event_date": "2026-10-27",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-056",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-28发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "北京市",
+      "event_date": "2026-10-28",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-057",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-01单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-01",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-058",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-02遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-02",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-059",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-03遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "上海市",
+      "event_date": "2026-10-03",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-060",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-04发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "上海市",
+      "event_date": "2026-10-04",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-061",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-05单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-05",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-062",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-06遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-06",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-063",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-07遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "烟台市",
+      "event_date": "2026-10-07",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-064",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-08发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "烟台市",
+      "event_date": "2026-10-08",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-065",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-09单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-09",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-066",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-10遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-10",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-067",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-11遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "青岛市",
+      "event_date": "2026-10-11",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-068",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-12发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "青岛市",
+      "event_date": "2026-10-12",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-069",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-13单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-13",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-070",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-14遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-14",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-071",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-15遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "济南市",
+      "event_date": "2026-10-15",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-072",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-16发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "济南市",
+      "event_date": "2026-10-16",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-073",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-17单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-17",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-074",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-18遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-18",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-075",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-19遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "北京市",
+      "event_date": "2026-10-19",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-076",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-20发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "北京市",
+      "event_date": "2026-10-20",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-077",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-21单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-21",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-078",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-22遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-22",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-079",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-23遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "上海市",
+      "event_date": "2026-10-23",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-080",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-24发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "上海市",
+      "event_date": "2026-10-24",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-081",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-25单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-25",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-082",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-26遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "烟台市",
+      "event_date": "2026-10-26",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-083",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-27遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "烟台市",
+      "event_date": "2026-10-27",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-084",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在烟台市，2026-10-28发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "烟台市",
+      "event_date": "2026-10-28",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-085",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-01单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-01",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-086",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-02遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "青岛市",
+      "event_date": "2026-10-02",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-087",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-03遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "青岛市",
+      "event_date": "2026-10-03",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-088",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在青岛市，2026-10-04发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "青岛市",
+      "event_date": "2026-10-04",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-089",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-05单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-05",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-090",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-06遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "济南市",
+      "event_date": "2026-10-06",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-091",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-07遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "济南市",
+      "event_date": "2026-10-07",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-092",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在济南市，2026-10-08发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "济南市",
+      "event_date": "2026-10-08",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-093",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-09单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-09",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-094",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-10遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "北京市",
+      "event_date": "2026-10-10",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-095",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-11遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "北京市",
+      "event_date": "2026-10-11",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-096",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在北京市，2026-10-12发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "北京市",
+      "event_date": "2026-10-12",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-097",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-13单位拖欠工资，希望了解工资记录如何整理。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-13",
+      "request": "了解工资记录如何整理"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-098",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-14遇到劳动合同争议，希望了解劳动合同材料准备流程。",
+    "expected_fields": {
+      "category": "劳动争议",
+      "location": "上海市",
+      "event_date": "2026-10-14",
+      "request": "了解劳动合同材料准备流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-099",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-15遇到离婚纠纷，希望了解婚姻家庭接待流程。",
+    "expected_fields": {
+      "category": "婚姻家庭",
+      "location": "上海市",
+      "event_date": "2026-10-15",
+      "request": "了解婚姻家庭接待流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  },
+  {
+    "id": "synthetic-100",
+    "provenance": "确定性模板生成的虚构记录，未由法律专业人员标注",
+    "content": "我在上海市，2026-10-16发生交通事故，希望了解交通事故材料登记流程。",
+    "expected_fields": {
+      "category": "交通事故",
+      "location": "上海市",
+      "event_date": "2026-10-16",
+      "request": "了解交通事故材料登记流程"
+    },
+    "expected_status": "awaiting_confirmation"
+  }
+]

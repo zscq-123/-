@@ -1,0 +1,44 @@
+name: legal-aid-demo
+services:
+  api:
+    build:
+      context: .
+      dockerfile: deploy/api.Dockerfile
+    environment:
+      APP_MODE: demo
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-local-demo-change-me}
+      DATABASE_URL: sqlite:////app/data/legal_aid.db
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      MAX_AGENT_STEPS: ${MAX_AGENT_STEPS:-40}
+      MAX_SESSION_COST: ${MAX_SESSION_COST:-1.0}
+      MODEL_MODE: ${MODEL_MODE:-deterministic}
+      MODEL_BASE_URL: ${MODEL_BASE_URL:-}
+      MODEL_NAME: ${MODEL_NAME:-}
+      MODEL_API_KEY: ${MODEL_API_KEY:-}
+      MODEL_EXTERNAL_CONSENT: ${MODEL_EXTERNAL_CONSENT:-false}
+      MODEL_INPUT_PRICE: ${MODEL_INPUT_PRICE:-0}
+      MODEL_OUTPUT_PRICE: ${MODEL_OUTPUT_PRICE:-0}
+    volumes:
+      - demo-data:/app/data
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+    environment:
+      BACKEND_URL: http://api:8000
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  demo-data:
