@@ -148,7 +148,7 @@ def append_run(s, agent, output, tools, start, citations=None, cost=0):
     s['runs'].append(run)
 
 
-def orchestrate(db, s, max_steps=40, max_cost=1.0):
+def orchestrate(db, s, max_steps=40, max_cost=1.0, *, allow_external_model=False):
     start = perf_counter()
     if len(s['runs']) + 4 > max_steps or sum(r['cost'] for r in s['runs']) >= max_cost:
         return handoff(db, s, '调用次数或费用达到限制')
@@ -163,8 +163,11 @@ def orchestrate(db, s, max_steps=40, max_cost=1.0):
     extracted, t = tool(db, s, 'intake', 'fields.extract', lambda: extract_fields(text))
     cost = 0
     try:
-        gateway = ModelGateway.from_env()
+        needs_extraction = any(not (s['fields'][key] or extracted[key])
+                               for key in ('category', 'location', 'event_date', 'request'))
+        gateway = ModelGateway.from_env() if allow_external_model and needs_extraction and text else None
         if gateway and text:
+            audit(db, 'session_holder', 'external_model_consent', s['id'], s['id'])
             result = gateway.extract(text, remaining_budget=max_cost-sum(r['cost'] for r in s['runs']), allowed_categories=CATEGORIES)
             extracted = {key: extracted.get(key) or value for key, value in result.fields.items()}
             cost = result.cost

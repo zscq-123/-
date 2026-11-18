@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
 from .database import Record, database, now, seed
+from .model_gateway import configured_provider
 from . import schemas as S
 from .services import VERSION, CATEGORIES, POLICY, ident, audit, tool, risk_flags, handoff, invalidate, orchestrate, lookup, candidates, append_run, explicit_conflicts
 
@@ -146,6 +147,7 @@ def create_app(database_url=None, *, rate_limit=None):
     @app.get('/api/health')
     def health():
         return {'status': 'ok', 'mode': mode, 'version': VERSION, 'model_mode': os.getenv('MODEL_MODE', 'deterministic'),
+                'model_provider': configured_provider() if os.getenv('MODEL_EXTERNAL_CONSENT') == 'true' and os.getenv('MODEL_API_KEY') else None,
                 'telephony': 'simulator_only', 'knowledge': 'demo_samples'}
 
     @app.post('/api/auth/login')
@@ -214,11 +216,14 @@ def create_app(database_url=None, *, rate_limit=None):
         return persist(record, s)
 
     @app.post('/api/orchestrator/run')
-    def run(body: S.Run, request: Request, db=Depends(get_db)):
-        record, _ = session_access(request, db, body.session_id)
+    def run(body: S.OrchestrationRun, request: Request, db=Depends(get_db)):
+        record, actor = session_access(request, db, body.session_id)
+        if body.allow_external_model and actor != 'session_holder':
+            raise HTTPException(403, '须由本次咨询的使用者同意外部模型整理')
         s = deepcopy(record.data)
         if s['status'] != 'collecting': raise HTTPException(409, '仅信息收集状态允许运行；请先修改需要补充的字段')
-        return persist(record, orchestrate(db, s, max_steps=int(os.getenv('MAX_AGENT_STEPS', '40')), max_cost=float(os.getenv('MAX_SESSION_COST', '1.0'))))
+        return persist(record, orchestrate(db, s, max_steps=int(os.getenv('MAX_AGENT_STEPS', '40')),
+            max_cost=float(os.getenv('MAX_SESSION_COST', '1.0')), allow_external_model=body.allow_external_model))
 
     @app.post('/api/sessions/{sid}/confirm')
     def confirm(sid: str, body: S.Confirm, request: Request, db=Depends(get_db)):

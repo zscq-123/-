@@ -25,7 +25,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 (cd apps/api && exec .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000) &
 BACKEND_PID=$!
-(cd apps/web && exec node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3000) &
+(cd apps/web && unset MODEL_API_KEY && exec node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3000) &
 FRONTEND_PID=$!
 printf '%s\n' '触屏接待：http://127.0.0.1:3000' '工作人员后台：http://127.0.0.1:3000/staff' 'API：http://127.0.0.1:8000/docs' '按 Ctrl+C 停止本脚本启动的服务。'
 while kill -0 "$BACKEND_PID" 2>/dev/null && kill -0 "$FRONTEND_PID" 2>/dev/null; do

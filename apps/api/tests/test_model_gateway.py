@@ -99,3 +99,23 @@ def test_invalid_environment_price_is_safe(monkeypatch):
     monkeypatch.setenv('MODEL_OUTPUT_PRICE', '1')
     with pytest.raises(GatewayError, match='单价'):
         ModelGateway.from_env()
+
+
+def test_deepseek_json_mode_retries_blank_response_once():
+    requests = []
+
+    def handler(request):
+        body = json.loads(request.content)
+        assert request.url == 'https://api.deepseek.com/chat/completions'
+        assert body['model'] == 'deepseek-flash'
+        assert body['thinking'] == {'type': 'disabled'}
+        assert body['response_format'] == {'type': 'json_object'}
+        assert 'JSON 示例' in body['messages'][0]['content']
+        requests.append(request)
+        if len(requests) == 1:
+            return httpx.Response(200, json={'choices': [{'finish_reason': 'stop', 'message': {'content': '   '}}]})
+        return reply()
+
+    model = ModelGateway(base_url='https://api.deepseek.com', model='deepseek-flash', api_key='test',
+                         external_consent=True, transport=httpx.MockTransport(handler))
+    assert model.extract('虚构测试说明').attempts == len(requests) == 2

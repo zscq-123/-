@@ -128,6 +128,58 @@ def test_basic_workflow(client):
     assert client.post('/api/orchestrator/run',headers=h,json={'session_id':s['id']}).status_code == 409
 
 
+def test_external_model_requires_session_holder_opt_in_and_missing_fields(client, monkeypatch):
+    from app.model_gateway import Extraction, ModelGateway
+
+    texts = []
+
+    class TestGateway:
+        def extract(self, text, **kwargs):
+            texts.append(text)
+            return Extraction({'category': '劳动争议', 'location': '烟台市', 'event_date': '上月',
+                               'request': '了解材料', 'materials': []}, 'deepseek-flash', 1, .0002, 200, 80)
+
+    monkeypatch.setattr(ModelGateway, 'from_env', classmethod(lambda cls: TestGateway()))
+    s, token_headers = new(client)
+    client.post(f"/api/sessions/{s['id']}/messages", headers=token_headers,
+                json={'content': '便利店没有给我结报酬，能不能帮忙登记。'})
+    run_data = {'session_id': s['id']}
+    assert client.post('/api/orchestrator/run', headers=token_headers, json=run_data).json()['status'] == 'collecting'
+    assert not texts
+    opted_in = {**run_data, 'allow_external_model': True}
+    assert client.post('/api/orchestrator/run', headers=auth(client), json=opted_in).status_code == 403
+    assert not texts
+    result = client.post('/api/orchestrator/run', headers=token_headers, json=opted_in).json()
+    assert result['status'] == 'awaiting_confirmation'
+    assert len(texts) == 1
+    intake_run = [run for run in result['runs'] if run['agent'] == 'intake'][-1]
+    assert intake_run['tools'][0]['model'] == 'deepseek-flash'
+    assert intake_run['cost'] == .0002
+
+    tapped, tap_headers = new(client)
+    client.patch(f"/api/sessions/{tapped['id']}/fields", headers=tap_headers,
+                 json={'category': '劳动争议', 'location': '本市', 'event_date': '近一周', 'request': '了解准备材料'})
+    assert client.post('/api/orchestrator/run', headers=tap_headers,
+                       json={'session_id': tapped['id'], 'allow_external_model': True}).json()['status'] == 'awaiting_confirmation'
+    assert len(texts) == 1
+
+
+def test_opted_in_provider_failure_routes_to_staff(client, monkeypatch):
+    from app.model_gateway import GatewayError, ModelGateway
+
+    class UnavailableGateway:
+        def extract(self, text, **kwargs):
+            raise GatewayError('internal provider detail')
+
+    monkeypatch.setattr(ModelGateway, 'from_env', classmethod(lambda cls: UnavailableGateway()))
+    s, token_headers = new(client)
+    client.post(f"/api/sessions/{s['id']}/messages", headers=token_headers, json={'content': '请帮忙登记'})
+    response = client.post('/api/orchestrator/run', headers=token_headers,
+                           json={'session_id': s['id'], 'allow_external_model': True})
+    assert response.json()['status'] == 'handed_off'
+    assert 'internal provider detail' not in response.text
+
+
 def test_cannot_create_before_confirmation(client):
     s,_ = ready(client)
     assert client.post('/api/work-orders',headers=auth(client),json={'session_id':s['id'],'review_note':'模拟复核'}).status_code == 409

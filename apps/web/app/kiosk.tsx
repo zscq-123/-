@@ -54,6 +54,8 @@ export default function Kiosk() {
   const [error, setError] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [voiceConsent, setVoiceConsent] = useState(false);
+  const [modelProvider, setModelProvider] = useState<string | null>(null);
+  const [modelConsent, setModelConsent] = useState(false);
   const [listening, setListening] = useState(false);
   const [speechText, setSpeechText] = useState('');
   const [usedVoice, setUsedVoice] = useState(false);
@@ -83,6 +85,7 @@ export default function Kiosk() {
     setFields(emptyFields);
     setVoiceOpen(false);
     setVoiceConsent(false);
+    setModelConsent(false);
     setSpeechText('');
     setUsedVoice(false);
     setError('');
@@ -118,6 +121,12 @@ export default function Kiosk() {
 
   useEffect(() => () => recognition.current?.abort(), []);
 
+  useEffect(() => {
+    void api<{ model_provider?: string | null }>('/health')
+      .then(health => setModelProvider(health.model_provider ?? null))
+      .catch(() => setModelProvider(null));
+  }, []);
+
   async function perform(task: () => Promise<void>) {
     if (running.current) return;
     running.current = true;
@@ -143,9 +152,9 @@ export default function Kiosk() {
     return access.current;
   }
 
-  async function run(id: string, token: string) {
+  async function run(id: string, token: string, allowExternalModel = false) {
     return api<Session>('/orchestrator/run', {
-      method: 'POST', body: { session_id: id }, sessionToken: token,
+      method: 'POST', body: { session_id: id, allow_external_model: allowExternalModel }, sessionToken: token,
     });
   }
 
@@ -260,7 +269,8 @@ export default function Kiosk() {
       });
       setSpeechText('');
       setVoiceOpen(false);
-      const result = saved.status === 'collecting' ? await run(id, token) : saved;
+      setModelConsent(false);
+      const result = saved.status === 'collecting' ? await run(id, token, !!modelProvider && modelConsent) : saved;
       if (result.status === 'handed_off') {
         finish(result);
         return;
@@ -371,6 +381,10 @@ export default function Kiosk() {
               <label className={styles.textLabel}>咨询说明
                 <textarea autoComplete="off" value={speechText} onChange={event => setSpeechText(event.target.value)} maxLength={4000} rows={3} placeholder="例如：我在烟台市，2026年11月1日遇到拖欠工资，希望了解如何登记。" />
               </label>
+              {modelProvider && <label className={styles.consentCheck}>
+                <input type="checkbox" checked={modelConsent} disabled={busy} onChange={event => setModelConsent(event.target.checked)} />
+                <span>同意将本次咨询的文字说明发送给 {modelProvider === 'deepseek' ? 'DeepSeek' : '外部模型'}，帮助补全登记信息（可选）。</span>
+              </label>}
               <button type="button" className={styles.primary} disabled={busy || listening || !speechText.trim()} onClick={applySpeech}>整理这段说明</button>
               {speechText.trim() && <button type="button" className={styles.helpLink} disabled={busy} onClick={() => setSpeechText('')}>清除说明</button>}
             </div>}

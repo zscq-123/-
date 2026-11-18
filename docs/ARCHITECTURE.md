@@ -33,7 +33,7 @@ AgentRun: `id,agent,version,input_summary,output,citations,tools,risks,next_step
 | GET /sessions/{id} | 授权头 | Session |
 | POST /sessions/{id}/messages | content | Session |
 | PATCH /sessions/{id}/fields | category,location,event_date,request,materials 可选 | Session |
-| POST /orchestrator/run | session_id | Session |
+| POST /orchestrator/run | session_id，allow_external_model（可选，默认 false，仅群众会话令牌可设为 true） | Session |
 | POST /sessions/{id}/confirm | summary_version | Session |
 | POST /sessions/{id}/handoff | reason | Session |
 | POST /sessions/{id}/phone-events | event: consent,transcript,interrupt,disconnect,asr_failure；content 可选 | Session |

@@ -31,9 +31,11 @@ cp .env.example .env
 
 ## 外部模型配置
 
-`MODEL_MODE=deterministic` 不向外部模型发送内容。只有明确取得第三方处理授权、核对供应商和数据路径之后，才能设置 `MODEL_MODE=external`、`MODEL_EXTERNAL_CONSENT=true` 和 `MODEL_BASE_URL`、`MODEL_NAME`、`MODEL_API_KEY`。网关地址为 HTTPS 的兼容 `/v1` 地址。示例配置没有真实密钥。
+`MODEL_MODE=deterministic` 为默认规则模式。虚构数据联调时，在仓库根目录的私有 `.env` 设置 `MODEL_MODE=external`、`MODEL_EXTERNAL_CONSENT=true`、`MODEL_BASE_URL=https://api.deepseek.com`、`MODEL_NAME=deepseek-flash`，并填写 `MODEL_API_KEY`。重启后端应用配置。实际处理中心咨询前，由机构确认第三方处理授权和数据范围。[DeepSeek Chat Completions 文档](https://api-docs.deepseek.com/api/create-chat-completion/)
 
-`MODEL_INPUT_PRICE` 与 `MODEL_OUTPUT_PRICE` 为每百万 tokens 的估算单价，币种应与供应商报价一致；统计不代表实际扣费。`MAX_SESSION_COST` 控制单会话模型估算费用上限，`MAX_AGENT_STEPS` 控制编排步骤上限；外部服务不确定性可能导致估算与账单不同。外部网关的自动化测试使用模拟响应，未完成真实供应商、计费和网络联调。规则模式不证明大模型理解准确率。
+现场端打开「语音或文字说明」，使用者勾选允许发送给 DeepSeek，并点击「整理这段说明」。规则缺少必要字段时才调用模型。模型只补充尚未确定的字段，群众核对后再提交。语音服务授权与 DeepSeek 授权独立。DeepSeek 调用失败或返回格式有误时，当前咨询进入待人工处理队列。
+
+`MODEL_INPUT_PRICE` 与 `MODEL_OUTPUT_PRICE` 为每百万 tokens 的估算单价，DeepSeek 示例按美元峰时未命中缓存的费率配置。`MAX_SESSION_COST` 控制单会话估算费用，账单以供应商为准。DeepSeek 的 HTTPS 请求直连官方域名，禁用思考模式并要求 JSON 输出，单次咨询可在必要时重试一次请求。[DeepSeek 模型与价格](https://api-docs.deepseek.com/quick_start/pricing/)
 
 ## 检查和回归
 

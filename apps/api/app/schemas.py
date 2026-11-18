@@ -1,5 +1,5 @@
 from typing import Any, Literal
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
 
 class Strict(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -34,6 +34,9 @@ class Fields(Strict):
 
 class Run(Strict):
     session_id: str = Field(max_length=64)
+
+class OrchestrationRun(Run):
+    allow_external_model: StrictBool = False
 
 class Confirm(Strict):
     summary_version: int = Field(ge=1)
