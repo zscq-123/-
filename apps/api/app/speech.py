@@ -1,7 +1,9 @@
 """Short, local Mandarin transcription on an opt-in demo installation."""
 import array
+from functools import lru_cache
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -18,6 +20,43 @@ AUDIO_FORMATS = {
     'audio/x-wav': 'wav',
 }
 _job = threading.BoundedSemaphore(1)
+_subtitle_note = re.compile(r'[（(\[【]\s*(?:字幕君|字幕组|音乐|音樂|掌声|掌聲|笑声|笑聲|音效)\s*[）)\]】][。.!！]*')
+
+
+@lru_cache(maxsize=1)
+def load_zipformer(directory: str):
+    if not directory:
+        return None
+    root = Path(directory)
+    files = {name: root / f'{name}-epoch-99-avg-1.int8.onnx' for name in ('encoder', 'decoder', 'joiner')}
+    files['tokens'] = root / 'tokens.txt'
+    if not all(path.is_file() for path in files.values()):
+        return None
+    try:
+        from sherpa_onnx import OnlineRecognizer
+
+        return OnlineRecognizer.from_transducer(
+            **{name: str(path) for name, path in files.items()}, num_threads=2, sample_rate=16000,
+        )
+    except (ImportError, RuntimeError, OSError):
+        return None
+
+
+def fast_preview_engine():
+    return load_zipformer(os.environ.get('SPEECH_PREVIEW_MODEL_DIR', '').strip())
+
+
+def zipformer_preview(wav: Path, recognizer) -> str:
+    with wave.open(str(wav), 'rb') as audio:
+        samples = array.array('h', audio.readframes(audio.getnframes()))
+        rate = audio.getframerate()
+    stream = recognizer.create_stream()
+    stream.accept_waveform(rate, [sample / 32768 for sample in samples])
+    stream.accept_waveform(rate, [0.0] * (rate // 5))
+    stream.input_finished()
+    while recognizer.is_ready(stream):
+        recognizer.decode_stream(stream)
+    return recognizer.get_result(stream).strip()
 
 
 class SpeechError(Exception):
@@ -35,15 +74,24 @@ def local_engine():
     return (model, ffmpeg, whisper) if ffmpeg and whisper else None
 
 
-def has_speech_level(wav: Path) -> bool:
+def has_speech_level(wav: Path, *, min_voiced_ms: int = 20) -> bool:
     with wave.open(str(wav), 'rb') as audio:
         # Check short windows so pauses don't hide quiet speech. Clip-level
         # energy is only a silence check, not a measure of recognizer accuracy.
+        voiced_samples = 0
+        minimum_samples = audio.getframerate() * min_voiced_ms / 1000
         while chunk := audio.readframes(320):
             samples = array.array('h', chunk)
             if samples and sum(sample * sample for sample in samples) > len(samples) * 105**2:
-                return True
+                voiced_samples += len(samples)
+                if voiced_samples >= minimum_samples:
+                    return True
     return False
+
+
+def clean_preview(text: str) -> str:
+    # Short clips sometimes produce standalone subtitle or sound-effect notes.
+    return '\n'.join(line for line in text.splitlines() if not _subtitle_note.fullmatch(line.strip())).strip()
 
 
 def transcribe(recording: bytes, content_type: str, *, preview: bool = False) -> str:
@@ -70,8 +118,14 @@ def transcribe(recording: bytes, content_type: str, *, preview: bool = False) ->
             )
             if decoded.returncode != 0 or not wav.is_file():
                 raise SpeechError(422, '未能读取这段录音，请重录或改用文字。')
-            if not has_speech_level(wav):
+            fast_engine = fast_preview_engine() if preview else None
+            if not has_speech_level(wav, min_voiced_ms=180 if fast_engine else 20):
                 raise SpeechError(422, '这段录音没有听到清晰的声音，请靠近麦克风重试。')
+            if fast_engine:
+                text = zipformer_preview(wav, fast_engine)
+                if not text:
+                    raise SpeechError(422, '暂未识别到可显示的字幕。')
+                return text[:4000]
             output = directory / 'transcript'
             result = subprocess.run(
                 [whisper, '-m', model, '-f', str(wav), '-l', 'zh', '-t', '4', '-nt', '-np',
@@ -82,12 +136,14 @@ def transcribe(recording: bytes, content_type: str, *, preview: bool = False) ->
             if result.returncode != 0 or not text_file.is_file():
                 raise SpeechError(503, '本地语音转写没有完成，请重试或改用文字。')
             text = text_file.read_text(encoding='utf-8').strip()
+            if preview:
+                text = clean_preview(text)
             if not text:
                 raise SpeechError(422, '没有得到可用的转写，请重试或改用文字。')
             return text[:4000]
     except subprocess.TimeoutExpired:
         raise SpeechError(504, '语音处理超时，请重试或改用文字。') from None
-    except (OSError, ValueError, EOFError, wave.Error):
+    except (OSError, ValueError, RuntimeError, EOFError, wave.Error):
         raise SpeechError(503, '本地语音转写暂不可用，请改用文字。') from None
     finally:
         _job.release()

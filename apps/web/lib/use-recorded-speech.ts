@@ -16,7 +16,8 @@ type Recording = {
 const formats = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus'];
 const maxBytes = 2 * 1024 * 1024;
 const expectedSeconds = 35;
-const previewIntervalMs = 2400;
+const fastPreviewIntervalMs = 500;
+const whisperPreviewIntervalMs = 2400;
 
 function release(recording: Recording) {
   window.clearTimeout(recording.timer);
@@ -37,7 +38,7 @@ function permissionMessage(cause: unknown) {
   return '无法打开麦克风。请检查麦克风连接，或改用文字。';
 }
 
-export function useRecordedSpeech(transcribe: Transcribe) {
+export function useRecordedSpeech(transcribe: Transcribe, fastPreview: boolean) {
   const active = useRef<Recording | null>(null);
   const [phase, setPhase] = useState<SpeechPhase>('idle');
   const [error, setError] = useState('');
@@ -105,7 +106,8 @@ export function useRecordedSpeech(transcribe: Transcribe) {
       recording.recorder = recorder;
       const chunks: Blob[] = [];
       let size = 0;
-      let lastPreviewAt = performance.now();
+      const previewIntervalMs = fastPreview ? fastPreviewIntervalMs : whisperPreviewIntervalMs;
+      let nextPreviewAt = performance.now() + previewIntervalMs;
       let latestPreview = '';
       let previewRequest: Promise<void> | undefined;
       const audioSnapshot = () => new Blob(chunks, {type: recorder.mimeType || chunks[0].type});
@@ -114,8 +116,10 @@ export function useRecordedSpeech(transcribe: Transcribe) {
         try {
           const text = await transcribe(audio, recording.controller.signal, true);
           if (active.current === recording && text.trim()) {
-            latestPreview = text;
-            if (!recording.stopping) setPreviewText(text);
+            if (text !== latestPreview) {
+              latestPreview = text;
+              if (!recording.stopping) setPreviewText(text);
+            }
           }
         } catch {
           // Silence and incomplete containers can fail during capture. A failed
@@ -133,8 +137,9 @@ export function useRecordedSpeech(transcribe: Transcribe) {
           return;
         }
         chunks.push(event.data);
-        if (!recording.stopping && !previewRequest && performance.now() - lastPreviewAt >= previewIntervalMs) {
-          lastPreviewAt = performance.now();
+        const now = performance.now();
+        if (!recording.stopping && !previewRequest && now >= nextPreviewAt) {
+          nextPreviewAt = now + previewIntervalMs;
           // Keep the container's initialization bytes with subsequent audio.
           previewRequest = updatePreview(audioSnapshot());
         }
@@ -166,7 +171,7 @@ export function useRecordedSpeech(transcribe: Transcribe) {
           }
         }
       };
-      recorder.start(250);
+      recorder.start(fastPreview ? 160 : 250);
       setPhase('listening');
       window.clearTimeout(recording.timer);
       recording.timer = window.setTimeout(stop, expectedSeconds * 1000);

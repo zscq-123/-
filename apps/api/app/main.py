@@ -16,7 +16,7 @@ from starlette.concurrency import run_in_threadpool
 from sqlalchemy import select
 from .database import Record, database, now, seed
 from .model_gateway import configured_provider
-from .speech import MAX_AUDIO_BYTES, SpeechError, local_engine, transcribe
+from .speech import MAX_AUDIO_BYTES, SpeechError, fast_preview_engine, local_engine, transcribe
 from . import schemas as S
 from .services import VERSION, CATEGORIES, POLICY, ident, audit, tool, risk_flags, handoff, invalidate, orchestrate, lookup, candidates, append_run, explicit_conflicts
 
@@ -29,6 +29,7 @@ def create_app(database_url=None, *, rate_limit=None):
     if mode != 'demo':
         raise RuntimeError('当前版本仅支持 demo，真实试点须先完成独立认证、机构隔离与安全验收')
     app = FastAPI(title='法律援助多智能体接待平台（模拟）', version=VERSION)
+    fast_preview_engine()
     engine, factory = database(database_url or os.getenv('DATABASE_URL', 'sqlite:///./data/legal_aid.db'))
     app.state.engine, app.state.session_factory = engine, factory
     with factory() as db: seed(db)
@@ -154,6 +155,7 @@ def create_app(database_url=None, *, rate_limit=None):
         return {'status': 'ok', 'mode': mode, 'version': VERSION, 'model_mode': os.getenv('MODEL_MODE', 'deterministic'),
                 'model_provider': configured_provider() if os.getenv('MODEL_EXTERNAL_CONSENT') == 'true' and os.getenv('MODEL_API_KEY') else None,
                 'speech_provider': 'local_whisper' if local_engine() else 'browser',
+                'speech_preview_provider': 'zipformer' if fast_preview_engine() is not None else 'whisper',
                 'telephony': 'simulator_only', 'knowledge': 'demo_samples'}
 
     @app.post('/api/auth/login')

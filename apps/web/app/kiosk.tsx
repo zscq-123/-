@@ -39,9 +39,10 @@ export default function Kiosk() {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [voiceConsent, setVoiceConsent] = useState(false);
   const [speechProvider, setSpeechProvider] = useState<SpeechProvider | null>(null);
+  const [fastPreview, setFastPreview] = useState(false);
   const [modelProvider, setModelProvider] = useState<string | null>(null);
   const [modelConsent, setModelConsent] = useState(false);
-  const { phase: voicePhase, error: voiceError, previewText, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput(speechProvider, transcribeRecording);
+  const { phase: voicePhase, error: voiceError, previewText, start: startSpeech, stop: stopSpeech, cancel: stopVoice } = useSpeechInput(speechProvider, transcribeRecording, fastPreview);
   const voiceActive = voicePhase !== 'idle';
   const [speechText, setSpeechText] = useState('');
   const [usedVoice, setUsedVoice] = useState(false);
@@ -94,10 +95,11 @@ export default function Kiosk() {
   }, [step, busy, reset]);
 
   useEffect(() => {
-    void api<{ model_provider?: string | null; speech_provider?: SpeechProvider }>('/health')
+    void api<{ model_provider?: string | null; speech_provider?: SpeechProvider; speech_preview_provider?: string }>('/health')
       .then(health => {
         setModelProvider(health.model_provider ?? null);
         setSpeechProvider(health.speech_provider ?? 'browser');
+        setFastPreview(health.speech_preview_provider === 'zipformer');
       })
       .catch(() => setSpeechProvider('browser'));
   }, []);

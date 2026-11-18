@@ -33,9 +33,11 @@ cp .env.example .env
 
 在实际触屏设备上，用带麦克风权限的浏览器打开本机地址或 HTTPS 地址。用虚构信息进入「语音或文字说明」，同意录音并转写，点击「开始说话」。启用本地 Whisper 时，说话期间查看「实时转写」字幕。说完点击「停止说话」，再核对或修改回填的完整文字。单段最多 35 秒，点「整理这段说明」才提交草稿。遇到无有效声音、设备未授权或处理超时，可重录、手填或继续点选。
 
-本地 Whisper 模式按约 2.4 秒的间隔把已录部分送到本站后端生成字幕，同一录音最多有一个字幕请求在处理。实际刷新速度取决于浏览器录音分块和机器性能。停止后按完整录音再次转写。如果完整转写失败，已有字幕会回填并提示核对末段。音频只用于临时处理，音频和未提交草稿不进入会话记录。DeepSeek 的文本整理仍需另外同意。浏览器原生识别模式仍可用于转写，实时字幕需要本地 Whisper 配置以及浏览器支持录音分块。
+启用 Zipformer 加速时约每 0.5 秒尝试更新字幕，否则由本地 Whisper 约每 2.4 秒预览一次。同一录音最多有一个字幕请求在处理，实际刷新速度随录音分块和机器性能变化。手动停止后仍由 Whisper 对完整录音重新转写。如果完整转写失败，已有字幕会回填并提示核对末段。音频只用于本地临时处理，音频和未提交草稿不进入会话记录。DeepSeek 的文本整理仍需单独同意。
 
 启用本地转写时，确保后端的 `PATH` 有 `ffmpeg` 和 `whisper-cli`。macOS 可运行 `brew install ffmpeg whisper-cpp`。把多语种模型（例如 `ggml-small-q5_1.bin`）放入 `apps/api/data/`，在根目录 `.env` 设置 `SPEECH_MODEL_PATH=./data/ggml-small-q5_1.bin`，重启后端。健康接口 `speech_provider` 显示 `local_whisper` 时已启用。模型文件不入 Git，当前演示容器默认走浏览器识别。[whisper.cpp 模型与运行说明](https://github.com/ggml-org/whisper.cpp)
+
+可在本地 Whisper 的基础上加速普通话实时字幕。用项目虚拟环境安装 `apps/api/requirements-speech-preview.txt`，下载中文 Zipformer 14M 模型，将 `tokens.txt` 和三个 `*.int8.onnx` 文件放入 `apps/api/data/sherpa-onnx-streaming-zipformer-zh-14M-2023-02-23/`。在根目录 `.env` 设置 `SPEECH_PREVIEW_MODEL_DIR=./data/sherpa-onnx-streaming-zipformer-zh-14M-2023-02-23` 后重启。健康接口 `speech_preview_provider=zipformer` 表示已加载。两套模型都在本机运行。[Sherpa-ONNX 官方模型说明](https://k2-fsa.github.io/sherpa/onnx/pretrained_models/online-transducer/zipformer-transducer-models.html)
 
 ## 外部模型配置
 

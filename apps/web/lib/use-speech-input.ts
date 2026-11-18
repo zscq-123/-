@@ -160,8 +160,8 @@ function useBrowserSpeechInput() {
   return { phase, error, start, stop, cancel, previewText: '' };
 }
 
-export function useSpeechInput(provider: SpeechProvider | null, transcribe: Transcribe) {
+export function useSpeechInput(provider: SpeechProvider | null, transcribe: Transcribe, fastPreview = false) {
   const browser = useBrowserSpeechInput();
-  const local = useRecordedSpeech(transcribe);
+  const local = useRecordedSpeech(transcribe, fastPreview);
   return provider === 'local_whisper' ? local : browser;
 }

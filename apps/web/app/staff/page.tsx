@@ -42,11 +42,12 @@ export default function Page() {
   const [phoneConsent, setPhoneConsent] = useState(false);
   const [voiceConsent, setVoiceConsent] = useState(false);
   const [speechProvider, setSpeechProvider] = useState<SpeechProvider | null>(null);
+  const [fastPreview, setFastPreview] = useState(false);
   const [evidenceConsent, setEvidenceConsent] = useState(false);
   const { phase: voicePhase, error: voiceError, previewText, start: startSpeech, stop: finishSpeech, cancel: cancelSpeech } = useSpeechInput(speechProvider, async (audio, signal, preview) => {
     if (!session) throw new Error('请先开始接待。');
     return transcribeAudio(session.id, sessionToken, audio, signal, preview);
-  });
+  }, fastPreview);
   const voiceActive = voicePhase !== 'idle';
   const [largeText, setLargeText] = useState(false);
   const [message, setMessage] = useState('');
@@ -83,9 +84,10 @@ export default function Page() {
   const acceptSession = useCallback((s: Session) => { setSession(s); setFields({...emptyFields, ...s.fields, materials: s.fields?.materials || []}); }, []);
   useEffect(() => {
     try { const saved = sessionStorage.getItem('legal-aid-auth'); if (saved) setAuth(JSON.parse(saved)); } catch { sessionStorage.removeItem('legal-aid-auth'); }
-    api<{ speech_provider?: SpeechProvider }>('/health').then(result => {
+    api<{ speech_provider?: SpeechProvider; speech_preview_provider?: string }>('/health').then(result => {
       setHealth('online');
       setSpeechProvider(result.speech_provider ?? 'browser');
+      setFastPreview(result.speech_preview_provider === 'zipformer');
     }).catch(() => {
       setHealth('offline');
       setSpeechProvider('browser');
